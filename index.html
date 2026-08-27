@@ -1,0 +1,2908 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta name="theme-color" content="#ffffff" />
+  <title>CardVault</title>
+  <style>
+    :root {
+      --bg: #f4f5f7;
+      --surface: #ffffff;
+      --surface2: #f0f1f3;
+      --border: #d8dbe2;
+      --text: #1a1d26;
+      --text-dim: #6b7280;
+      --accent: #f97316;
+      --accent-hover: #ea580c;
+      --accent-soft: rgba(249, 115, 22, 0.18);
+      --success: #16a34a;
+      --danger: #dc2626;
+      --foil: #d97706;
+      --radius: 12px;
+      --ring: 0 0 0 1px var(--accent);
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      line-height: 1.4;
+    }
+    header {
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      padding: 10px 12px;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    header h1 { font-size: 1.1rem; font-weight: 700; flex: 1; min-width: 120px; }
+
+    .app-brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 1.15rem;
+      font-weight: 800;
+      letter-spacing: 0.01em;
+    }
+    .app-logo {
+      width: 36px;
+      height: 36px;
+      border-radius: 8px;
+      object-fit: cover;
+      flex-shrink: 0;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.12);
+    }
+
+    .btn {
+      background: var(--accent); color: white; border: 1px solid transparent; border-radius: 8px;
+      padding: 8px 12px; font-size: 0.8rem; font-weight: 600; cursor: pointer; white-space: nowrap;
+      transition: background 0.15s, box-shadow 0.15s, transform 0.15s;
+    }
+    .btn:hover {
+      background: var(--accent-hover);
+      box-shadow: var(--ring);
+    }
+    .btn:disabled { opacity: 0.45; cursor: not-allowed; }
+    .btn-secondary {
+      background: var(--surface);
+      color: var(--text);
+      border: 1px solid var(--border);
+    }
+    .btn-secondary:hover {
+      background: var(--surface2);
+      box-shadow: var(--ring);
+    }
+    .btn-danger { background: var(--danger); color: #fff; }
+    .btn-success { background: var(--success); color: #fff; }
+    .btn-sm { padding: 5px 10px; font-size: 0.75rem; }
+
+    /* Settings cog */
+    .btn-icon {
+      width: 34px; height: 34px; padding: 0;
+      display: inline-flex; align-items: center; justify-content: center;
+      border-radius: 50%;
+      border: none !important;
+      background: transparent;
+      font-size: 1.05rem;
+      line-height: 1;
+    }
+    .btn-icon.btn-secondary {
+      background: transparent;
+      border: none !important;
+    }
+    .btn-icon .cog {
+      display: inline-block;
+      transition: transform 0.35s ease;
+    }
+    .btn-icon:hover .cog {
+      transform: rotate(45deg);
+    }
+    .btn-icon:hover {
+      box-shadow: 0 0 0 1px var(--accent);
+      background: var(--accent-soft);
+    }
+
+    .tabs {
+      display: flex; background: var(--surface); border-bottom: 1px solid var(--border);
+      overflow-x: auto; -webkit-overflow-scrolling: touch;
+    }
+    .tab {
+      padding: 12px 16px; font-size: 0.85rem; font-weight: 600; color: var(--text-dim);
+      cursor: pointer; border-bottom: 2px solid transparent; white-space: nowrap;
+    }
+    .tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+
+    .folders-bar {
+      background: var(--surface); border-bottom: 1px solid var(--border);
+      padding: 8px 10px; display: flex; gap: 6px; overflow-x: auto; -webkit-overflow-scrolling: touch;
+      align-items: center;
+    }
+    .folder-chip {
+      background: var(--surface2); border: 1px solid var(--border); border-radius: 20px;
+      padding: 5px 10px 5px 12px; font-size: 0.8rem; white-space: nowrap; cursor: pointer;
+      display: flex; align-items: center; gap: 5px;
+      transition: box-shadow 0.15s, border-color 0.15s, transform 0.25s ease;
+      flex-shrink: 0;
+    }
+    .folder-chip:hover { box-shadow: var(--ring); }
+    
+    .folder-chip.watch-chip {
+      background: #e8eaed;
+      border-color: #c5c9d1;
+      color: #3c4048;
+    }
+    .folder-chip.watch-chip.active {
+      background: #9aa0a6;
+      border-color: #9aa0a6;
+      color: #fff;
+    }
+    .folder-chip.watch-chip.active .count {
+      background: rgba(255,255,255,0.28);
+    }
+
+    .folder-chip.active { background: var(--accent); border-color: var(--accent); color: white; }
+    .folder-chip.active:hover { box-shadow: var(--ring); }
+    .folder-chip .count {
+      background: rgba(0,0,0,0.12); border-radius: 10px; padding: 1px 6px; font-size: 0.7rem;
+    }
+    .folder-chip.active .count { background: rgba(255,255,255,0.25); }
+    .folder-chip .folder-x {
+      width: 16px; height: 16px; border-radius: 50%;
+      display: inline-flex; align-items: center; justify-content: center;
+      font-size: 0.7rem; font-weight: 700; line-height: 1;
+      background: rgba(0,0,0,0.1); color: inherit;
+      border: none; cursor: pointer; padding: 0;
+      opacity: 0.7;
+    }
+    .folder-chip .folder-x:hover { opacity: 1; background: rgba(220,38,38,0.2); color: var(--danger); }
+    .folder-chip.active .folder-x { background: rgba(255,255,255,0.25); }
+    .folder-chip.active .folder-x:hover { background: rgba(255,255,255,0.4); color: #fff; }
+    .folder-add-btn {
+      flex-shrink: 0;
+      background: var(--surface);
+      color: var(--accent);
+      border: 1px dashed var(--accent);
+      border-radius: 20px;
+      padding: 5px 12px;
+      font-size: 0.8rem;
+      font-weight: 700;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: box-shadow 0.15s, background 0.15s, transform 0.25s ease;
+    }
+    
+    .folder-chip .folder-kind {
+      font-size: 0.62rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+      opacity: 0.75;
+      padding: 1px 5px;
+      border-radius: 6px;
+      background: rgba(0,0,0,0.06);
+    }
+    .folder-chip.active .folder-kind {
+      background: rgba(255,255,255,0.25);
+      opacity: 1;
+    }
+
+    .folder-add-btn:hover {
+      box-shadow: var(--ring);
+      background: var(--accent-soft);
+    }
+
+    /* Settings side panel */
+    .settings-backdrop {
+      position: fixed; inset: 0; z-index: 250;
+      background: rgba(15, 15, 20, 0.25);
+      backdrop-filter: blur(2px);
+      -webkit-backdrop-filter: blur(2px);
+      opacity: 0; pointer-events: none;
+      transition: opacity 0.3s ease;
+    }
+    .settings-backdrop.open { opacity: 1; pointer-events: auto; }
+    
+    .btn-login {
+      padding: 6px 12px;
+      font-size: 0.78rem;
+      font-weight: 700;
+      border-radius: 20px;
+      border: 1px solid var(--accent);
+      background: var(--accent);
+      color: #fff;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: background 0.15s, box-shadow 0.15s, opacity 0.15s;
+    }
+    .btn-login:hover { background: var(--accent-hover); box-shadow: var(--ring); }
+    .btn-login.signed-in {
+      background: var(--surface);
+      color: var(--text);
+      border-color: var(--border);
+    }
+    .settings-signout {
+      margin-top: auto;
+      display: block;
+      width: 100%;
+      text-align: center;
+      padding: 10px 12px;
+      border-radius: 10px;
+      border: none;
+      font-size: 0.85rem;
+      font-weight: 700;
+      cursor: pointer;
+      background: var(--accent);
+      color: #fff;
+      transition: background 0.15s, opacity 0.15s;
+    }
+    .settings-signout:hover:not(:disabled) { background: var(--accent-hover); }
+    .settings-signout:disabled {
+      background: #c5c9d1;
+      color: #6b7280;
+      cursor: not-allowed;
+      opacity: 0.85;
+    }
+    .settings-panel {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .settings-panel {
+      position: fixed; top: 0; right: 0; bottom: 0; z-index: 260;
+      width: 280px;
+      max-width: 85vw;
+      background: var(--surface);
+      border-left: 1px solid var(--border);
+      box-shadow: -8px 0 28px rgba(0,0,0,0.08);
+      padding: 16px 14px;
+      transform: translateX(100%);
+      transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+      display: flex; flex-direction: column; gap: 10px;
+    }
+    .settings-panel.open { transform: translateX(0); }
+    .settings-panel h3 {
+      font-size: 0.95rem; font-weight: 700; margin-bottom: 4px;
+    }
+    .settings-panel .settings-item {
+      font-size: 0.8rem;
+      color: var(--text-dim);
+      padding: 8px 10px;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      background: var(--surface2);
+      cursor: pointer;
+      transition: box-shadow 0.15s, border-color 0.15s;
+    }
+    .settings-panel .settings-item:hover {
+      box-shadow: var(--ring);
+      color: var(--text);
+    }
+    .settings-panel .settings-note {
+      font-size: 0.7rem;
+      color: var(--text-dim);
+      line-height: 1.35;
+      margin-top: auto;
+    }
+
+    main { padding: 8px; max-width: 1280px; margin: 0 auto; }
+
+    /* Strip under folders (Refresh Prices on the left) */
+    .collection-subbar {
+      display: none;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 10px 2px;
+      max-width: 1280px;
+      margin: 0 auto;
+    }
+    .collection-subbar.show { display: flex; }
+    .collection-subbar .btn-sm {
+      border-radius: 20px;
+      font-weight: 600;
+    }
+
+    /* Value summary — card-style metrics */
+    .value-bar {
+      display: none;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 8px;
+      margin: 8px 0 14px;
+      padding: 0;
+      background: transparent;
+      border: none;
+    }
+    .value-bar.show { display: grid; }
+    .value-stat {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 10px 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      min-width: 0;
+      position: relative;
+      overflow: hidden;
+    }
+    .value-stat::before {
+      content: '';
+      position: absolute;
+      left: 0; top: 0; bottom: 0;
+      width: 3px;
+      background: var(--border);
+    }
+    .value-stat.paid::before { background: var(--text-dim); }
+    .value-stat.market::before { background: var(--accent); }
+    .value-stat.gain.up::before { background: var(--success); }
+    .value-stat.gain.down::before { background: var(--danger); }
+    .value-stat.cards::before { background: #94a3b8; }
+    .value-label {
+      font-size: 0.65rem;
+      color: var(--text-dim);
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      font-weight: 600;
+    }
+    .value-num {
+      font-size: 1.05rem;
+      font-weight: 750;
+      font-variant-numeric: tabular-nums;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .value-num.up { color: var(--success); }
+    .value-num.down { color: var(--danger); }
+    .value-num.muted { color: var(--text-dim); font-weight: 650; }
+    @media (max-width: 520px) {
+      .value-bar { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    }
+
+    /* Floating sort control */
+    .sort-fab {
+      position: fixed;
+      right: 16px;
+      bottom: 18px;
+      z-index: 150;
+      width: 52px;
+      height: 52px;
+      border-radius: 50%;
+      border: none;
+      background: var(--accent);
+      color: #fff;
+      font-size: 1.35rem;
+      box-shadow: 0 6px 20px rgba(249, 115, 22, 0.4);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: transform 0.15s, box-shadow 0.15s, background 0.15s;
+    }
+    .sort-fab:hover {
+      background: var(--accent-hover);
+      transform: scale(1.05);
+      box-shadow: 0 8px 24px rgba(249, 115, 22, 0.5);
+    }
+    .sort-panel {
+      position: fixed;
+      right: 16px;
+      bottom: 78px;
+      z-index: 150;
+      width: 220px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.12);
+      padding: 10px;
+      transform: translateX(120%);
+      opacity: 0;
+      pointer-events: none;
+      transition: transform 0.3s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.25s ease;
+    }
+    .sort-panel.open {
+      transform: translateX(0);
+      opacity: 1;
+      pointer-events: auto;
+    }
+    .sort-panel h4 {
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      color: var(--text-dim);
+      margin: 4px 6px 8px;
+    }
+    .sort-option {
+      display: block;
+      width: 100%;
+      text-align: left;
+      border: none;
+      background: transparent;
+      color: var(--text);
+      font-size: 0.82rem;
+      font-weight: 600;
+      padding: 9px 10px;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+    .sort-option:hover { background: var(--surface2); }
+    .sort-option.active {
+      background: var(--accent-soft);
+      color: var(--accent-hover);
+    }
+
+    .toolbar {
+      display: flex; gap: 8px; margin-bottom: 12px; flex-wrap: wrap; align-items: center;
+    }
+    .toolbar input, .toolbar select {
+      background: var(--surface); border: 1px solid var(--border); border-radius: 8px;
+      padding: 10px 12px; color: var(--text); font-size: 0.95rem;
+    }
+    .toolbar input { flex: 1; min-width: 140px; }
+    .toolbar input:focus, .toolbar select:focus { outline: none; border-color: var(--accent); }
+
+    .bulk-bar {
+      background: var(--surface2); border: 1px solid var(--border); border-radius: 10px;
+      padding: 10px 12px; margin-bottom: 12px; display: none; align-items: center; gap: 10px; flex-wrap: wrap;
+    }
+    .bulk-bar.show { display: flex; }
+
+    .grid {
+      display: grid;
+      /* 5 cards per row — ~10% larger tiles via wider layout + tighter gaps */
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+      gap: 6px;
+    }
+    @media (max-width: 420px) {
+      /* Only the narrowest phones drop to 3 so cards stay usable */
+      .grid { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; }
+    }
+    .card {
+      background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);
+      overflow: hidden; cursor: pointer; position: relative; transition: border-color 0.15s;
+    }
+    .card:hover, .card.selected { border-color: var(--accent); }
+    .card.selected { outline: 2px solid var(--accent); }
+    .card-img-wrap {
+      position: relative;
+      width: 100%;
+      aspect-ratio: 5/7;
+      background: var(--surface2);
+      overflow: hidden;
+    }
+    .card-img-wrap img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      object-position: center top;
+      display: block;
+      /* Full-resolution PNG scaled by the browser — no extra soft filters */
+      image-rendering: auto;
+      transform: translateZ(0); /* promote to own layer for cleaner compositing */
+    }
+    /* Paid price + foil badge overlay (bottom-right on image) */
+    .paid-overlay {
+      position: absolute;
+      bottom: 6px;
+      right: 6px;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      padding: 4px 8px 4px 5px;
+      border-radius: 20px;
+      background: rgba(10, 10, 18, 0.55);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      border: 1px solid rgba(255,255,255,0.14);
+      z-index: 2;
+    }
+    .foil-pip {
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background: #c48a1a; /* amber — better contrast than bright yellow */
+      color: #1a1200;
+      font-size: 0.65rem;
+      font-weight: 800;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      letter-spacing: -0.02em;
+    }
+    .foil-pip.sf { font-size: 0.55rem; }
+    .paid-amt {
+      color: #fff;
+      font-size: 0.72rem;
+      font-weight: 700;
+      white-space: nowrap;
+      text-shadow: 0 1px 2px rgba(0,0,0,0.55);
+    }
+
+    .card-body { padding: 7px 9px 9px; }
+    .card-name {
+      font-size: 0.78rem; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    .card-meta { font-size: 0.7rem; color: var(--text-dim); margin-top: 1px; }
+    .card-row {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin-top: 4px;
+    }
+    .card-qty {
+      display: inline-block; background: var(--accent); color: white; border-radius: 5px;
+      padding: 1px 6px; font-size: 0.7rem; font-weight: 700;
+      flex-shrink: 0;
+    }
+    .price-diff {
+      font-size: 0.7rem;
+      font-weight: 700;
+      white-space: nowrap;
+      margin-left: auto; /* push diff + now to the right */
+    }
+    .price-diff.up { color: var(--success); }
+    .price-diff.down { color: var(--danger); }
+    .price-diff.flat { color: var(--text-dim); }
+    .price-now {
+      color: var(--text);
+      font-size: 0.72rem;
+      font-weight: 600;
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+
+    .check {
+      position: absolute; top: 6px; left: 6px; width: 22px; height: 22px; border-radius: 6px;
+      background: rgba(0,0,0,0.55); border: 2px solid white; display: flex; align-items: center;
+      justify-content: center; font-size: 0.75rem; color: white; opacity: 0; z-index: 3;
+    }
+    .card.selected .check { opacity: 1; background: var(--accent); border-color: var(--accent); }
+
+    .set-list { display: flex; flex-direction: column; gap: 4px; }
+    .set-row {
+      background: var(--surface); border: 1px solid var(--border); border-radius: 10px;
+      padding: 12px 14px; cursor: pointer; display: flex; justify-content: space-between; align-items: center;
+    }
+    .set-row:hover { border-color: var(--accent); }
+    .set-name { font-weight: 600; font-size: 0.95rem; }
+    .set-code { color: var(--text-dim); font-size: 0.8rem; }
+
+    .empty { text-align: center; padding: 36px 16px; color: var(--text-dim); }
+    .loading { text-align: center; padding: 20px; color: var(--text-dim); }
+
+    /* Generic modals (bulk / paste / folder) */
+    .modal-overlay {
+      position: fixed; inset: 0; background: rgba(0,0,0,0.7); display: flex;
+      align-items: flex-end; justify-content: center; z-index: 200;
+      opacity: 0; pointer-events: none; transition: opacity 0.2s;
+    }
+    .modal-overlay.open { opacity: 1; pointer-events: auto; }
+    .modal {
+      background: var(--surface); border-radius: 16px 16px 0 0; width: 100%; max-width: 520px;
+      max-height: 92vh; overflow-y: auto; padding: 18px; transform: translateY(100%);
+      transition: transform 0.25s ease;
+    }
+    .modal-overlay.open .modal { transform: translateY(0); }
+    .modal h2 { font-size: 1.1rem; margin-bottom: 14px; }
+    .modal label { display: block; font-size: 0.78rem; color: var(--text-dim); margin: 10px 0 4px; }
+    .modal input, .modal select, .modal textarea {
+      width: 100%; background: var(--surface2); border: 1px solid var(--border); border-radius: 8px;
+      padding: 10px 12px; color: var(--text); font-size: 0.95rem;
+    }
+    .modal textarea { min-height: 140px; font-family: monospace; font-size: 0.85rem; resize: vertical; }
+    .modal-actions { display: flex; gap: 8px; margin-top: 16px; }
+    .modal-actions .btn { flex: 1; padding: 11px; }
+
+    /* ===== Card detail / edit sheet (tap a collection card) ===== */
+    .card-sheet-overlay {
+      position: fixed; inset: 0; z-index: 220;
+      display: flex; flex-direction: column; align-items: center; justify-content: flex-end;
+      background: rgba(8, 8, 16, 0.55);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      opacity: 0; pointer-events: none;
+      transition: opacity 0.65s ease;
+    }
+    .card-sheet-overlay.open { opacity: 1; pointer-events: auto; }
+
+    .card-sheet-stage {
+      flex: 1 1 auto;
+      position: relative;
+      width: 100%;
+      min-height: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 10px 0 4px;
+    }
+
+    /* Prev / next peek cards */
+    .card-peek {
+      position: absolute;
+      top: 50%;
+      transform: translateY(-54%) scale(0.72);
+      width: min(28vw, 130px);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.45s ease, transform 0.65s cubic-bezier(0.22, 1, 0.36, 1);
+      z-index: 1;
+    }
+    .card-sheet-overlay.open .card-peek.visible {
+      opacity: 0.55;
+      pointer-events: auto;
+      cursor: pointer;
+    }
+    .card-peek.prev { left: 2px; }
+    .card-peek.next { right: 2px; }
+    .card-peek img {
+      width: 100%;
+      aspect-ratio: 5/7;
+      object-fit: cover;
+      border-radius: 10px;
+      box-shadow: 0 6px 20px rgba(0,0,0,0.4);
+      display: block;
+      background: var(--surface2);
+    }
+    .card-peek:active { opacity: 0.85 !important; }
+
+    .card-nav-btn {
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      z-index: 5;
+      width: 36px; height: 36px;
+      border-radius: 50%;
+      border: 1px solid rgba(255,255,255,0.18);
+      background: rgba(20, 20, 35, 0.65);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      color: #fff;
+      font-size: 1.15rem;
+      line-height: 1;
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.4s ease, background 0.15s;
+    }
+    .card-sheet-overlay.open .card-nav-btn.visible {
+      opacity: 1;
+      pointer-events: auto;
+    }
+    .card-nav-btn:hover { background: rgba(40, 40, 70, 0.85); }
+    .card-nav-btn.prev { left: max(4px, calc(50% - min(48vw, 230px) - 44px)); }
+    .card-nav-btn.next { right: max(4px, calc(50% - min(48vw, 230px) - 44px)); }
+
+    .card-sheet-art {
+      position: relative;
+      z-index: 2;
+      display: flex; align-items: center; justify-content: center;
+      width: 100%;
+      min-height: 0;
+    }
+    .card-sheet-art img#modalCardImg {
+      /* slightly wider than before (+~5%) */
+      width: min(96vw, 445px);
+      height: auto;
+      max-height: 56vh;
+      object-fit: contain;
+      border-radius: 14px;
+      box-shadow: 0 12px 40px rgba(0,0,0,0.55);
+      display: none;
+      transform: scale(0.86);
+      opacity: 0;
+      transition: transform 0.65s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.55s ease;
+    }
+    .card-sheet-art img#modalCardImg.show { display: block; }
+    .card-sheet-overlay.open .card-sheet-art img#modalCardImg.show {
+      transform: scale(1);
+      opacity: 1;
+    }
+    /* slide direction when navigating */
+    .card-sheet-art img#modalCardImg.slide-left {
+      animation: cardSlideFromRight 0.55s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+    .card-sheet-art img#modalCardImg.slide-right {
+      animation: cardSlideFromLeft 0.55s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+    @keyframes cardSlideFromRight {
+      from { transform: translateX(18%) scale(0.96); opacity: 0.35; }
+      to   { transform: translateX(0) scale(1); opacity: 1; }
+    }
+    @keyframes cardSlideFromLeft {
+      from { transform: translateX(-18%) scale(0.96); opacity: 0.35; }
+      to   { transform: translateX(0) scale(1); opacity: 1; }
+    }
+
+    .card-sheet-panel {
+      width: 100%;
+      max-width: 520px;
+      background: var(--surface);
+      border-radius: 16px 16px 0 0;
+      border: 1px solid var(--border);
+      border-bottom: none;
+      padding: 10px 12px 14px;
+      transform: translateY(100%);
+      transition: transform 0.65s cubic-bezier(0.22, 1, 0.36, 1);
+      z-index: 3;
+    }
+    .card-sheet-overlay.open .card-sheet-panel { transform: translateY(0); }
+
+    .card-sheet-title {
+      font-size: 0.9rem;
+      font-weight: 700;
+      line-height: 1.25;
+      margin-bottom: 2px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .card-sheet-sub {
+      font-size: 0.72rem;
+      color: var(--text-dim);
+      margin-bottom: 8px;
+    }
+
+    .card-sheet-row {
+      display: flex;
+      gap: 6px;
+      align-items: stretch;
+      margin-bottom: 6px;
+    }
+    .card-sheet-field {
+      flex: 1;
+      min-width: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+    .card-sheet-field label {
+      font-size: 0.62rem;
+      color: var(--text-dim);
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+    }
+    .card-sheet-field input,
+    .card-sheet-field select {
+      width: 100%;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 5px 6px;
+      color: var(--text);
+      font-size: 0.75rem;
+      height: 30px;
+    }
+    .card-sheet-field.folder-field { flex: 1.2; }
+
+    .card-sheet-actions {
+      display: flex;
+      gap: 6px;
+      margin-top: 4px;
+    }
+    .card-sheet-actions .btn {
+      flex: 1;
+      padding: 6px 8px;
+      font-size: 0.75rem;
+      height: 30px;
+      border-radius: 6px;
+    }
+    .card-sheet-actions .btn-danger {
+      flex: 0 0 auto;
+      min-width: 70px;
+    }
+
+    
+    .bulk-card-list {
+      max-height: 42vh;
+      overflow-y: auto;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      margin: 10px 0 4px;
+      background: var(--surface2);
+    }
+    .bulk-card-row {
+      display: grid;
+      grid-template-columns: 1fr 64px 88px;
+      gap: 6px;
+      align-items: center;
+      padding: 8px 10px;
+      border-bottom: 1px solid var(--border);
+      font-size: 0.8rem;
+    }
+    .bulk-card-row:last-child { border-bottom: none; }
+    .bulk-card-row .bname {
+      font-weight: 600;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .bulk-card-row .bmeta {
+      font-size: 0.7rem;
+      color: var(--text-dim);
+    }
+    .bulk-card-row input {
+      width: 100%;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 5px 6px;
+      color: var(--text);
+      font-size: 0.78rem;
+      height: 30px;
+    }
+    .bulk-card-list.watch-mode .bulk-paid-col { display: none; }
+    .bulk-card-list.watch-mode .bulk-card-row {
+      grid-template-columns: 1fr 64px;
+    }
+    .bulk-headers {
+      display: grid;
+      grid-template-columns: 1fr 64px 88px;
+      gap: 6px;
+      padding: 0 10px 4px;
+      font-size: 0.65rem;
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+      color: var(--text-dim);
+      font-weight: 700;
+    }
+    .bulk-headers.watch-mode { grid-template-columns: 1fr 64px; }
+    .bulk-headers.watch-mode .bulk-paid-col { display: none; }
+
+    
+    .auth-status {
+      font-size: 0.72rem;
+      color: var(--text-dim);
+      margin: 0 0 8px;
+      line-height: 1.35;
+    }
+    .auth-status.ok { color: var(--success); font-weight: 600; }
+    .auth-modal .modal { max-width: 420px; }
+    .auth-modal .modal label { margin-top: 8px; }
+    .auth-tabs {
+      display: flex; gap: 6px; margin-bottom: 12px;
+    }
+    .auth-tabs button {
+      flex: 1; padding: 8px; border-radius: 8px; border: 1px solid var(--border);
+      background: var(--surface2); cursor: pointer; font-weight: 600; font-size: 0.85rem;
+    }
+    .auth-tabs button.active {
+      background: var(--accent); color: #fff; border-color: var(--accent);
+    }
+    .auth-error {
+      color: var(--danger); font-size: 0.8rem; margin-top: 8px; min-height: 1.2em;
+    }
+    .sync-dot {
+      display: inline-block; width: 8px; height: 8px; border-radius: 50%;
+      background: #9aa0a6; margin-right: 6px;
+    }
+    .sync-dot.on { background: var(--success); }
+
+    .toast {
+      position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%) translateY(120px);
+      background: var(--surface2); border: 1px solid var(--border); padding: 11px 18px;
+      border-radius: 10px; font-size: 0.88rem; z-index: 300; transition: transform 0.3s;
+      max-width: 90%; text-align: center;
+    }
+    .toast.show { transform: translateX(-50%) translateY(0); }
+
+    @media (min-width: 600px) {
+      .modal-overlay { align-items: center; }
+      .modal { border-radius: 16px; }
+      .card-sheet-art img#modalCardImg { width: min(72vw, 470px); max-height: 60vh; }
+    }
+  </style>
+
+  <!-- Firebase (free Google cloud login + sync) -->
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
+</head>
+<body>
+  <header>
+    <h1 class="app-brand"><img class="app-logo" src="data:image/png;base64,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" alt="" width="36" height="36" /><span>CardVault</span></h1>
+    <button type="button" class="btn-login" id="headerLoginBtn" onclick="onHeaderLoginClick()">Log in</button>
+    <button class="btn btn-secondary btn-icon" id="settingsBtn" onclick="toggleSettings()" title="Settings" aria-label="Settings">
+      <span class="cog">⚙</span>
+    </button>
+    <input type="file" id="csvInput" accept=".csv,text/csv" style="display:none" onchange="importCSV(event)" />
+  </header>
+
+  <div class="settings-backdrop" id="settingsBackdrop" onclick="closeSettings()"></div>
+  <aside class="settings-panel" id="settingsPanel">
+    <h3>Settings</h3>
+    <p class="auth-status" id="authStatus"><span class="sync-dot" id="syncDot"></span>Not signed in</p>
+    <div class="settings-item" onclick="toggleCurrency()">Currency: <strong id="settingsCurrencyLabel">CAD</strong></div>
+    <div class="settings-item" onclick="document.getElementById('csvInput').click(); closeSettings();">Import CSV</div>
+    <div class="settings-item" onclick="exportCSV(); closeSettings();">Export CSV</div>
+    <p class="settings-note">Sign in with the Log in button (top right). Your list syncs to the cloud automatically while signed in.</p>
+    <button type="button" class="settings-signout" id="settingsSignOutBtn" onclick="cloudSignOut()" disabled>Sign out</button>
+  </aside>
+
+  <!-- Auth modal -->
+  <div class="modal-overlay auth-modal" id="authModal">
+    <div class="modal">
+      <h2>CardVault Account</h2>
+      <div class="auth-tabs">
+        <button type="button" id="authTabLogin" class="active" onclick="setAuthMode('login')">Log in</button>
+        <button type="button" id="authTabSignup" onclick="setAuthMode('signup')">Sign up</button>
+      </div>
+      <label>Email</label>
+      <input type="email" id="authEmail" autocomplete="email" placeholder="you@email.com" />
+      <label>Password</label>
+      <input type="password" id="authPassword" autocomplete="current-password" placeholder="At least 6 characters" />
+      <div class="auth-error" id="authError"></div>
+      <div class="modal-actions">
+        <button class="btn btn-secondary" onclick="closeModal('authModal')">Cancel</button>
+        <button class="btn" id="authSubmitBtn" onclick="submitAuth()">Log in</button>
+      </div>
+      <p style="font-size:0.72rem;color:var(--text-dim);margin-top:10px;line-height:1.4;">
+        First time? Use <b>Sign up</b>. After you log in, every change saves to your cloud account automatically.
+      </p>
+    </div>
+  </div>
+
+  <!-- Firebase setup modal -->
+  <div class="modal-overlay" id="firebaseSetupModal">
+    <div class="modal">
+      <h2>Cloud setup (free, one-time)</h2>
+      <p style="font-size:0.8rem;color:var(--text-dim);line-height:1.45;margin-bottom:10px;">
+        CardVault uses Google Firebase (free tier) so your list follows your login.
+        Takes about 5 minutes. You only do this once, then paste the same config on each device (or keep it in this HTML file).
+      </p>
+      <ol style="font-size:0.78rem;color:var(--text-dim);line-height:1.5;padding-left:18px;margin-bottom:10px;">
+        <li>Go to <b>console.firebase.google.com</b> → Create project</li>
+        <li>Add an app → <b>Web</b> → copy the <code>firebaseConfig</code> object</li>
+        <li>Build → Authentication → Sign-in method → enable <b>Email/Password</b></li>
+        <li>Build → Firestore Database → Create database (start in <b>production</b> mode)</li>
+        <li>Firestore → Rules → paste the rules shown below → Publish</li>
+        <li>Paste your config JSON below → Save</li>
+      </ol>
+      <label>Firestore rules (copy these)</label>
+      <textarea id="firebaseRulesHint" readonly style="min-height:90px;font-size:0.7rem;">rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /users/{userId}/{document=**} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+    }
+  }
+}</textarea>
+      <label>Firebase web config (paste JSON)</label>
+      <textarea id="firebaseConfigInput" placeholder='{ "apiKey": "...", "authDomain": "...", "projectId": "...", "storageBucket": "...", "messagingSenderId": "...", "appId": "..." }' style="min-height:110px;font-size:0.75rem;"></textarea>
+      <div class="auth-error" id="firebaseSetupError"></div>
+      <div class="modal-actions">
+        <button class="btn btn-secondary" onclick="closeModal('firebaseSetupModal')">Cancel</button>
+        <button class="btn" onclick="saveFirebaseConfig()">Save config</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="tabs">
+    <div class="tab active" data-tab="collection" onclick="switchTab('collection')">Collection</div>
+    <div class="tab" data-tab="watch" onclick="switchTab('watch')">Watch List</div>
+    <div class="tab" data-tab="sets" onclick="switchTab('sets')">Browse Sets</div>
+    <div class="tab" data-tab="search" onclick="switchTab('search')">Search</div>
+  </div>
+
+  <div class="folders-bar" id="foldersBar"></div>
+  <div class="collection-subbar" id="collectionSubbar">
+    <button class="btn btn-secondary btn-sm" onclick="refreshFolderPrices()">↻ Refresh Prices</button>
+  </div>
+
+  <main>
+    <!-- COLLECTION TAB -->
+    <div id="panel-collection">
+      <div id="valueBar" class="value-bar"></div>
+      <div id="collectionContent"></div>
+    </div>
+
+  <!-- Floating sort -->
+  <button type="button" class="sort-fab" id="sortFab" onclick="toggleSortPanel()" title="Sort cards" aria-label="Sort cards">📁</button>
+  <div class="sort-panel" id="sortPanel">
+    <h4>Sort by</h4>
+    <button type="button" class="sort-option" data-sort="number-asc" onclick="setSort('number-asc')">Number ↑ (low → high)</button>
+    <button type="button" class="sort-option" data-sort="number-desc" onclick="setSort('number-desc')">Number ↓ (high → low)</button>
+    <button type="button" class="sort-option" data-sort="name-asc" onclick="setSort('name-asc')">Name A → Z</button>
+    <button type="button" class="sort-option" data-sort="name-desc" onclick="setSort('name-desc')">Name Z → A</button>
+    <button type="button" class="sort-option" data-sort="price-asc" onclick="setSort('price-asc')">Price ↑ cheapest</button>
+    <button type="button" class="sort-option" data-sort="price-desc" onclick="setSort('price-desc')">Price ↓ expensive</button>
+  </div>
+
+    <!-- SETS TAB -->
+    <div id="panel-sets" style="display:none">
+      <div class="toolbar">
+        <input type="text" id="setFilter" placeholder="Filter sets..." oninput="renderSetList()" />
+      </div>
+      <div id="setListArea">
+        <div class="loading">Loading sets from Scryfall...</div>
+      </div>
+      <div id="setCardsArea" style="display:none">
+        <div class="toolbar">
+          <button class="btn btn-secondary btn-sm" onclick="backToSetList()">← All Sets</button>
+          <span id="currentSetName" style="font-weight:600; flex:1"></span>
+        </div>
+        <div class="bulk-bar" id="setBulkBar">
+          <span id="setSelectedCount">0 selected</span>
+          <button class="btn btn-sm" onclick="bulkAddSelected()">Add selected to folder</button>
+          <button class="btn btn-secondary btn-sm" onclick="clearSelection()">Clear</button>
+        </div>
+        <div id="setCardsGrid" class="grid"></div>
+      </div>
+    </div>
+
+    <!-- SEARCH TAB -->
+    <div id="panel-search" style="display:none">
+      <div class="toolbar">
+        <input type="text" id="searchInput" placeholder="Card name..." autocomplete="off" />
+        <button class="btn" onclick="doSearch()">Search</button>
+      </div>
+      <div class="bulk-bar" id="searchBulkBar">
+        <span id="searchSelectedCount">0 selected</span>
+        <button class="btn btn-sm" onclick="bulkAddSelected()">Add selected to folder</button>
+        <button class="btn btn-secondary btn-sm" onclick="clearSelection()">Clear</button>
+      </div>
+      <div id="searchStatus" class="loading" style="display:none">Searching...</div>
+      <div id="searchContent"></div>
+    </div>
+  </main>
+
+  <!-- Add / Edit Card Modal -->
+  <div class="card-sheet-overlay" id="cardModal" onclick="closeModal('cardModal')">
+    <div class="card-sheet-stage" onclick="closeModal('cardModal')">
+      <div class="card-peek prev" id="peekPrev" onclick="event.stopPropagation(); navCard(-1)">
+        <img id="peekPrevImg" alt="" />
+      </div>
+      <div class="card-peek next" id="peekNext" onclick="event.stopPropagation(); navCard(1)">
+        <img id="peekNextImg" alt="" />
+      </div>
+      <button type="button" class="card-nav-btn prev" id="navPrevBtn" onclick="event.stopPropagation(); navCard(-1)" aria-label="Previous">‹</button>
+      <button type="button" class="card-nav-btn next" id="navNextBtn" onclick="event.stopPropagation(); navCard(1)" aria-label="Next">›</button>
+      <div class="card-sheet-art" onclick="closeModal('cardModal')">
+        <img id="modalCardImg" alt="" onclick="event.stopPropagation()" />
+      </div>
+    </div>
+    <div class="card-sheet-panel" onclick="event.stopPropagation()">
+      <div class="card-sheet-title" id="modalCardName">Card</div>
+      <div class="card-sheet-sub" id="modalCardSet"></div>
+
+      <div class="card-sheet-row">
+        <div class="card-sheet-field folder-field">
+          <label>Folder</label>
+          <select id="modalFolder"></select>
+        </div>
+      </div>
+
+      <div class="card-sheet-row">
+        <div class="card-sheet-field">
+          <label>Qty</label>
+          <input type="number" id="modalQty" value="1" min="1" max="999" />
+        </div>
+        <div class="card-sheet-field" id="modalPaidField">
+          <label>Paid</label>
+          <input type="number" id="modalPaid" value="" min="0" step="0.01" placeholder="0.00" />
+        </div>
+        <div class="card-sheet-field">
+          <label>Finish</label>
+          <select id="modalFoil">
+            <option value="nonfoil">Non-foil</option>
+            <option value="foil">Foil</option>
+            <option value="surge">Surge Foil</option>
+          </select>
+        </div>
+        <div class="card-sheet-field">
+          <label>Cond.</label>
+          <select id="modalCondition">
+            <option value="NM">NM</option>
+            <option value="LP">LP</option>
+            <option value="MP">MP</option>
+            <option value="HP">HP</option>
+            <option value="DMG">DMG</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="card-sheet-actions">
+        <button class="btn btn-secondary" onclick="closeModal('cardModal')">Cancel</button>
+        <button class="btn" id="modalSaveBtn" onclick="saveCard()">Save</button>
+        <button class="btn btn-danger" id="modalDeleteBtn" style="display:none" onclick="deleteCard()">Remove</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bulk Add Modal -->
+  <div class="modal-overlay" id="bulkModal">
+    <div class="modal">
+      <h2>Add <span id="bulkCount">0</span> cards</h2>
+      <label>Folder</label>
+      <select id="bulkFolder" onchange="onBulkFolderChange()"></select>
+      <label>Finish (all)</label>
+      <select id="bulkFoil">
+        <option value="nonfoil">Non-foil</option>
+        <option value="foil">Foil</option>
+        <option value="surge">Surge Foil</option>
+      </select>
+      <label>Condition (all)</label>
+      <select id="bulkCondition">
+        <option value="NM">Near Mint (NM)</option>
+        <option value="LP">Lightly Played (LP)</option>
+        <option value="MP">Moderately Played (MP)</option>
+        <option value="HP">Heavily Played (HP)</option>
+        <option value="DMG">Damaged</option>
+      </select>
+      <div class="bulk-headers" id="bulkHeaders">
+        <span>Card</span>
+        <span>Qty</span>
+        <span class="bulk-paid-col">Paid</span>
+      </div>
+      <div class="bulk-card-list" id="bulkCardList"></div>
+      <p id="bulkPaidHint" style="font-size:0.72rem;color:var(--text-dim);margin:4px 0 0;">Leave Paid blank if unknown. Watch List folders never ask for price paid.</p>
+      <div class="modal-actions">
+        <button class="btn btn-secondary" onclick="closeModal('bulkModal')">Cancel</button>
+        <button class="btn btn-success" onclick="confirmBulkAdd()">Add All</button>
+      </div>
+    </div>
+  </div>
+
+  <input type="file" id="backupInput" accept=".json,application/json" style="display:none" onchange="importBackup(event)" />
+
+  <!-- Paste List Modal -->
+  <div class="modal-overlay" id="pasteModal">
+    <div class="modal">
+      <h2>Paste Card List</h2>
+      <p style="font-size:0.82rem; color:var(--text-dim); margin-bottom:10px;">
+        Paste one card per line. Formats supported:<br>
+        • <code>2 Sol Ring</code><br>
+        • <code>Sol Ring (c21) 263</code><br>
+        • <code>1x Lightning Bolt</code>
+      </p>
+      <label>Folder</label>
+      <select id="pasteFolder"></select>
+      <div id="pastePaidWrap">
+      <label>Price Paid each (optional — applied to all)</label>
+      <input type="number" id="pastePaid" value="" min="0" step="0.01" placeholder="Leave blank if unknown" />
+      </div>
+      <label>Card list</label>
+      <textarea id="pasteText" placeholder="2 Sol Ring&#10;1 Rhystic Study&#10;Lightning Bolt (lea) 161"></textarea>
+      <div class="modal-actions">
+        <button class="btn btn-secondary" onclick="closeModal('pasteModal')">Cancel</button>
+        <button class="btn" onclick="processPasteList()">Import List</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- New Folder Modal -->
+  <div class="modal-overlay" id="folderModal">
+    <div class="modal">
+      <h2>New Folder</h2>
+      <label>Folder Name</label>
+      <input type="text" id="folderNameInput" placeholder="e.g. Commander, Trades, MH3..." />
+      <div class="modal-actions">
+        <button class="btn btn-secondary" onclick="closeModal('folderModal')">Cancel</button>
+        <button class="btn" onclick="createFolder()">Create</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <script>
+    
+    // Safe storage: localStorage may be blocked in sandboxed iframes
+    const memoryStore = {};
+    const store = {
+      getItem(k) {
+        try { return window.localStorage.getItem(k); } catch (e) { return memoryStore[k] ?? null; }
+      },
+      setItem(k, v) {
+        try { window.localStorage.setItem(k, v); } catch (e) { memoryStore[k] = String(v); }
+      },
+      removeItem(k) {
+        try { window.localStorage.removeItem(k); } catch (e) { delete memoryStore[k]; }
+      }
+    };
+
+    const STORAGE_KEY = 'mtg_tracker_v3';
+    let state = {
+      folders: [],
+      items: [],
+      activeFolderId: null,
+      tab: 'collection',
+      sets: [],
+      currentSetCode: null,
+      currentSetCards: [],
+      searchResults: [],
+      selected: new Set(),
+      pendingCard: null,
+      editingItemId: null,
+      bulkCards: [],
+      browseIds: [],
+      browseIndex: -1,
+      sortMode: 'number-asc',
+      currency: 'CAD',       // display currency: 'USD' | 'CAD'
+      usdCadRate: 1.39,      // fallback until live rate loads
+      rateUpdatedAt: null
+    };
+
+
+    // ---------- Firebase cloud account ----------
+
+    // Embedded Firebase config — same file works on every device; only login needed
+    window.CARDVAULT_FIREBASE = {
+      apiKey: "AIzaSyCG6uQ53Cqcp9sWZB395u9UamqGKC1WQzk",
+      authDomain: "cardvault-b08b2.firebaseapp.com",
+      projectId: "cardvault-b08b2",
+      storageBucket: "cardvault-b08b2.firebasestorage.app",
+      messagingSenderId: "112259706017",
+      appId: "1:112259706017:web:dd11fa1720a3aed10214e0"
+    };
+
+    let fbApp = null;
+    let fbAuth = null;
+    let fbDb = null;
+    let cloudUser = null;
+    let authMode = 'login';
+    let syncTimer = null;
+    let cloudReady = false;
+
+    function getFirebaseConfig() {
+      if (window.CARDVAULT_FIREBASE && window.CARDVAULT_FIREBASE.apiKey) {
+        return window.CARDVAULT_FIREBASE;
+      }
+      try {
+        const raw = store.getItem('cardvault_firebase_config');
+        if (raw) return JSON.parse(raw);
+      } catch (e) {}
+      return null;
+    }
+
+    function initFirebase() {
+      const cfg = getFirebaseConfig();
+      if (!cfg || !cfg.apiKey || !cfg.projectId) {
+        cloudReady = false;
+        updateAuthStatus();
+        return false;
+      }
+      try {
+        if (!firebase.apps.length) {
+          fbApp = firebase.initializeApp(cfg);
+        } else {
+          fbApp = firebase.app();
+        }
+        fbAuth = firebase.auth();
+        fbDb = firebase.firestore();
+        cloudReady = true;
+        fbAuth.onAuthStateChanged(async (user) => {
+          cloudUser = user;
+          updateAuthStatus();
+          if (user) {
+            toast('Signed in — syncing…');
+            await pullCloudState();
+          }
+        });
+        updateAuthStatus();
+        return true;
+      } catch (e) {
+        console.error(e);
+        cloudReady = false;
+        updateAuthStatus();
+        return false;
+      }
+    }
+
+    function updateAuthStatus() {
+      const el = document.getElementById('authStatus');
+      const loginBtn = document.getElementById('headerLoginBtn');
+      const signOutBtn = document.getElementById('settingsSignOutBtn');
+      if (!el) return;
+      if (!cloudReady) {
+        el.className = 'auth-status';
+        el.innerHTML = '<span class="sync-dot" id="syncDot"></span>Connecting to cloud…';
+        if (loginBtn) {
+          loginBtn.textContent = 'Log in';
+          loginBtn.classList.remove('signed-in');
+          loginBtn.disabled = false;
+        }
+        if (signOutBtn) signOutBtn.disabled = true;
+        return;
+      }
+      if (cloudUser) {
+        el.className = 'auth-status ok';
+        el.innerHTML = '<span class="sync-dot on" id="syncDot"></span>Signed in as ' + escapeHtml(cloudUser.email || 'user');
+        if (loginBtn) {
+          loginBtn.textContent = 'Account';
+          loginBtn.classList.add('signed-in');
+        }
+        if (signOutBtn) signOutBtn.disabled = false;
+      } else {
+        el.className = 'auth-status';
+        el.innerHTML = '<span class="sync-dot" id="syncDot"></span>Not signed in';
+        if (loginBtn) {
+          loginBtn.textContent = 'Log in';
+          loginBtn.classList.remove('signed-in');
+          loginBtn.disabled = false;
+        }
+        if (signOutBtn) signOutBtn.disabled = true;
+      }
+    }
+    function onHeaderLoginClick() {
+      if (cloudUser) {
+        toggleSettings();
+        return;
+      }
+      openAuthModal();
+    }
+
+    function openAuthModal() {
+      if (!cloudReady && !initFirebase()) {
+        toast('Cloud unavailable — check your connection');
+        return;
+      }
+      document.getElementById('authError').textContent = '';
+      document.getElementById('authEmail').value = '';
+      document.getElementById('authPassword').value = '';
+      setAuthMode('login');
+      openModal('authModal');
+    }
+
+    function openFirebaseSetup() {
+      document.getElementById('firebaseSetupError').textContent = '';
+      const cfg = getFirebaseConfig();
+      document.getElementById('firebaseConfigInput').value = cfg ? JSON.stringify(cfg, null, 2) : '';
+      openModal('firebaseSetupModal');
+    }
+
+    function saveFirebaseConfig() {
+      const err = document.getElementById('firebaseSetupError');
+      err.textContent = '';
+      let raw = document.getElementById('firebaseConfigInput').value.trim();
+      if (!raw) {
+        err.textContent = 'Paste your Firebase config';
+        return;
+      }
+      try {
+        // Accept full snippet: const firebaseConfig = { ... };
+        const brace = raw.indexOf('{');
+        const end = raw.lastIndexOf('}');
+        if (brace === -1 || end === -1) throw new Error('no object');
+        raw = raw.slice(brace, end + 1);
+        // Firebase console uses JS keys (apiKey: "...") — convert to JSON ("apiKey": "...")
+        raw = raw
+          .replace(/([,{]\s*)([A-Za-z0-9_]+)\s*:/g, '$1"$2":')
+          .replace(/,\s*}/g, '}');
+        const cfg = JSON.parse(raw);
+        if (!cfg.apiKey || !cfg.projectId) throw new Error('missing apiKey/projectId');
+        store.setItem('cardvault_firebase_config', JSON.stringify(cfg));
+        window.CARDVAULT_FIREBASE = cfg;
+        closeModal('firebaseSetupModal');
+        if (initFirebase()) {
+          toast('Cloud config saved');
+          openAuthModal();
+        } else {
+          toast('Config saved but Firebase failed to start');
+        }
+      } catch (e) {
+        console.error(e);
+        err.textContent = 'Could not read config — paste the whole firebaseConfig block from Firebase';
+      }
+    }
+
+    function setAuthMode(mode) {
+      authMode = mode;
+      document.getElementById('authTabLogin').classList.toggle('active', mode === 'login');
+      document.getElementById('authTabSignup').classList.toggle('active', mode === 'signup');
+      document.getElementById('authSubmitBtn').textContent = mode === 'login' ? 'Log in' : 'Create account';
+      document.getElementById('authError').textContent = '';
+    }
+
+    async function submitAuth() {
+      const err = document.getElementById('authError');
+      err.textContent = '';
+      if (!cloudReady && !initFirebase()) {
+        err.textContent = 'Cloud not configured';
+        return;
+      }
+      const email = document.getElementById('authEmail').value.trim();
+      const password = document.getElementById('authPassword').value;
+      if (!email || password.length < 6) {
+        err.textContent = 'Enter email and a password (6+ characters)';
+        return;
+      }
+      try {
+        if (authMode === 'signup') {
+          await fbAuth.createUserWithEmailAndPassword(email, password);
+          // Push local data up for new accounts
+          await pushCloudState(true);
+        } else {
+          await fbAuth.signInWithEmailAndPassword(email, password);
+        }
+        closeModal('authModal');
+        toast(authMode === 'signup' ? 'Account created — cloud sync on' : 'Logged in');
+      } catch (e) {
+        console.error(e);
+        const map = {
+          'auth/email-already-in-use': 'Email already registered — try Log in',
+          'auth/invalid-email': 'Invalid email',
+          'auth/user-not-found': 'No account with that email',
+          'auth/wrong-password': 'Wrong password',
+          'auth/invalid-credential': 'Wrong email or password',
+          'auth/weak-password': 'Password too weak (use 6+ characters)',
+          'auth/network-request-failed': 'Network error — check connection'
+        };
+        err.textContent = map[e.code] || e.message || 'Auth failed';
+      }
+    }
+
+    async function cloudSignOut() {
+      closeSettings();
+      if (!fbAuth) return;
+      try {
+        await fbAuth.signOut();
+        toast('Signed out (local data kept on this device)');
+      } catch (e) {
+        toast('Sign out failed');
+      }
+    }
+
+    function scheduleCloudPush() {
+      if (!cloudUser || !fbDb) return;
+      clearTimeout(syncTimer);
+      syncTimer = setTimeout(() => pushCloudState(false), 800);
+    }
+
+    async function pushCloudState(force) {
+      if (!cloudUser || !fbDb) return;
+      try {
+        const payload = getFullBackupPayload();
+        payload.updatedAt = new Date().toISOString();
+        await fbDb.collection('users').doc(cloudUser.uid).collection('data').doc('cardvault').set(payload);
+        if (force) toast('Uploaded to cloud');
+      } catch (e) {
+        console.error('cloud push', e);
+        toast('Cloud save failed — check Firestore rules');
+      }
+    }
+
+    async function pullCloudState() {
+      if (!cloudUser || !fbDb) return;
+      try {
+        const snap = await fbDb.collection('users').doc(cloudUser.uid).collection('data').doc('cardvault').get();
+        if (!snap.exists) {
+          // First login on this account — upload local
+          await pushCloudState(true);
+          return;
+        }
+        const data = snap.data();
+        const localRaw = store.getItem(STORAGE_KEY);
+        let localCount = 0;
+        try { localCount = (JSON.parse(localRaw || '{}').items || []).length; } catch (e) {}
+        const cloudCount = (data.items || []).length;
+        // Prefer cloud if it has data; if local has more and cloud empty-ish, ask
+        if (localCount > cloudCount && cloudCount === 0 && localCount > 0) {
+          await pushCloudState(true);
+          return;
+        }
+        if (localCount > 0 && cloudCount > 0 && localCount !== cloudCount) {
+          // Use newer updatedAt if available
+          const cloudTime = data.updatedAt || data.exportedAt || '';
+          const localPrefs = store.getItem('mtg_tracker_prefs');
+          // Prefer cloud as source of truth when signed in
+        }
+        applyBackupPayload({
+          folders: data.folders || [],
+          items: data.items || [],
+          currency: data.currency,
+          usdCadRate: data.usdCadRate,
+          rateUpdatedAt: data.rateUpdatedAt,
+          sortMode: data.sortMode
+        });
+        toast('Synced from cloud');
+      } catch (e) {
+        console.error('cloud pull', e);
+        toast('Could not load cloud data');
+      }
+    }
+
+    // ---------- persistence ----------
+    function loadState() {
+      try {
+        let raw = store.getItem(STORAGE_KEY);
+        if (!raw) raw = store.getItem('mtg_tracker_v2') || store.getItem('mtg_tracker_v1');
+        if (raw) {
+          const p = JSON.parse(raw);
+          state.folders = p.folders || [];
+          state.items = (p.items || []).map(i => ({
+            ...i,
+            purchasePrice: i.purchasePrice != null ? i.purchasePrice : null,
+            // purchase prices are stored in USD for consistent conversion
+            purchaseCurrency: i.purchaseCurrency || 'USD',
+            price: i.price != null ? i.price : null,
+            priceFoil: i.priceFoil != null ? i.priceFoil : null,
+            finish: i.finish || (i.foil ? 'foil' : 'nonfoil'),
+            foil: !!(i.finish ? i.finish !== 'nonfoil' : i.foil)
+          }));
+          if (p.currency === 'USD' || p.currency === 'CAD') state.currency = p.currency;
+          if (p.usdCadRate) state.usdCadRate = p.usdCadRate;
+          if (p.rateUpdatedAt) state.rateUpdatedAt = p.rateUpdatedAt;
+        }
+      } catch (e) {}
+      // Migrate folder kinds
+      state.folders = (state.folders || []).map((f, idx) => ({
+        ...f,
+        kind: f.kind === 'watch' ? 'watch' : 'collection',
+        sortOrder: f.sortOrder != null ? f.sortOrder : idx
+      }));
+      if (!state.folders.some(f => f.kind === 'collection')) {
+        state.folders.unshift({ id: crypto.randomUUID(), name: 'Main Collection', kind: 'collection', sortOrder: 0 });
+      }
+      if (!state.folders.some(f => f.kind === 'watch')) {
+        state.folders.push({ id: crypto.randomUUID(), name: 'Watch List', kind: 'watch', sortOrder: 1000 });
+      }
+      const firstCol = state.folders.find(f => f.kind === 'collection');
+      state.activeFolderId = firstCol ? firstCol.id : state.folders[0].id;
+      // separate prefs key so currency survives even if collection is cleared
+      try {
+        const prefs = JSON.parse(store.getItem('mtg_tracker_prefs') || '{}');
+        if (prefs.currency === 'USD' || prefs.currency === 'CAD') state.currency = prefs.currency;
+        if (prefs.usdCadRate) state.usdCadRate = prefs.usdCadRate;
+        if (prefs.rateUpdatedAt) state.rateUpdatedAt = prefs.rateUpdatedAt;
+      } catch (e) {}
+      saveState();
+      updateCurrencyButton();
+    }
+    function saveState() {
+      store.setItem(STORAGE_KEY, JSON.stringify({
+        folders: state.folders,
+        items: state.items,
+        currency: state.currency,
+        usdCadRate: state.usdCadRate,
+        rateUpdatedAt: state.rateUpdatedAt
+      }));
+      store.setItem('mtg_tracker_prefs', JSON.stringify({
+        currency: state.currency,
+        usdCadRate: state.usdCadRate,
+        rateUpdatedAt: state.rateUpdatedAt
+      }));
+      scheduleCloudPush();
+    }
+    function updateCurrencyButton() {
+      const lab = document.getElementById('settingsCurrencyLabel');
+      if (lab) {
+        lab.textContent = state.currency === 'CAD'
+          ? `CAD (1 USD ≈ ${state.usdCadRate.toFixed(3)})`
+          : 'USD';
+      }
+    }
+    function toggleSettings() {
+      const panel = document.getElementById('settingsPanel');
+      const backdrop = document.getElementById('settingsBackdrop');
+      const open = !panel.classList.contains('open');
+      panel.classList.toggle('open', open);
+      backdrop.classList.toggle('open', open);
+    }
+    function closeSettings() {
+      document.getElementById('settingsPanel').classList.remove('open');
+      document.getElementById('settingsBackdrop').classList.remove('open');
+    }
+
+    // ---------- helpers ----------
+    function toast(msg) {
+      const el = document.getElementById('toast');
+      el.textContent = msg;
+      el.classList.add('show');
+      setTimeout(() => el.classList.remove('show'), 2800);
+    }
+    function openModal(id) { document.getElementById(id).classList.add('open'); }
+    function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+    function escapeHtml(s) {
+      if (!s) return '';
+      return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+    }
+    /** Convert an amount in USD into the active display currency */
+    function fromUsd(usdAmount) {
+      if (usdAmount == null || isNaN(usdAmount)) return null;
+      if (state.currency === 'CAD') return usdAmount * state.usdCadRate;
+      return usdAmount;
+    }
+    /** Convert a display-currency amount back to USD (for storing purchase price) */
+    function toUsd(displayAmount) {
+      if (displayAmount == null || isNaN(displayAmount)) return null;
+      if (state.currency === 'CAD') return displayAmount / state.usdCadRate;
+      return displayAmount;
+    }
+    function fmtMoney(n, alreadyInDisplayCurrency = false) {
+      if (n == null || isNaN(n)) return '—';
+      const val = alreadyInDisplayCurrency ? Number(n) : fromUsd(Number(n));
+      if (val == null || isNaN(val)) return '—';
+      const symbol = state.currency === 'CAD' ? 'CA$' : '$';
+      return symbol + val.toFixed(2);
+    }
+    function toggleCurrency() {
+      state.currency = state.currency === 'CAD' ? 'USD' : 'CAD';
+      saveState();
+      updateCurrencyButton();
+      // re-render whatever is visible
+      if (state.tab === 'collection' || state.tab === 'watch') renderCollection();
+      if (state.tab === 'search') renderSearch();
+      if (state.tab === 'sets' && state.currentSetCards.length) renderSetCards();
+      updatePaidPlaceholders();
+      toast(`Currency: ${state.currency}${state.currency === 'CAD' ? ` (rate ${state.usdCadRate.toFixed(4)})` : ''}`);
+    }
+    function updatePaidPlaceholders() {
+      const label = state.currency === 'CAD' ? 'Price Paid each (CAD)' : 'Price Paid each (USD)';
+      const short = state.currency === 'CAD' ? 'e.g. 3.50 CAD' : 'e.g. 2.50 USD';
+      ['modalPaid', 'pastePaid'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.placeholder = short;
+      });
+      // update visible labels if present
+      document.querySelectorAll('label').forEach(lab => {
+        if (/Price Paid/i.test(lab.textContent)) {
+          lab.textContent = lab.textContent.includes('optional')
+            ? `Price Paid each (${state.currency}, optional)`
+            : `Price Paid (each, ${state.currency})`;
+        }
+      });
+    }
+    async function fetchExchangeRate() {
+      try {
+        // Free daily rates, no API key (updates about once per day)
+        const res = await fetch('https://open.er-api.com/v6/latest/USD');
+        if (!res.ok) throw new Error('rate fetch failed');
+        const data = await res.json();
+        const cad = data?.rates?.CAD;
+        if (cad && cad > 0) {
+          state.usdCadRate = cad;
+          state.rateUpdatedAt = data.time_last_update_utc || new Date().toISOString();
+          saveState();
+          updateCurrencyButton();
+          if (state.tab === 'collection' || state.tab === 'watch') renderCollection();
+        }
+      } catch (e) {
+        // keep last known / fallback rate
+        console.warn('Exchange rate fetch failed, using', state.usdCadRate);
+      }
+    }
+    function normalizeScryfall(c) {
+      // PNG = highest quality Scryfall scan (sharpest when scaled down on phone)
+      const uris = c.image_uris || c.card_faces?.[0]?.image_uris || {};
+      const image = uris.png || uris.large || uris.normal || uris.small || '';
+      const usd = c.prices?.usd != null && c.prices.usd !== '' ? parseFloat(c.prices.usd) : null;
+      const usdFoil = c.prices?.usd_foil != null && c.prices.usd_foil !== '' ? parseFloat(c.prices.usd_foil) : null;
+      return {
+        scryfallId: c.id,
+        name: c.name,
+        set: c.set,
+        setName: c.set_name,
+        collectorNumber: c.collector_number,
+        image,
+        price: usd,          // default non-foil
+        priceFoil: usdFoil,  // foil / surge market
+        typeLine: c.type_line || ''
+      };
+    }
+    /** Pick market price for a given finish */
+    function priceForFinish(cardOrItem, finish) {
+      const f = finish || 'nonfoil';
+      if (f === 'foil' || f === 'surge') {
+        if (cardOrItem.priceFoil != null) return cardOrItem.priceFoil;
+        // fallback if only one price stored on item
+        return cardOrItem.price != null ? cardOrItem.price : null;
+      }
+      return cardOrItem.price != null ? cardOrItem.price : null;
+    }
+    function finishFromItem(i) {
+      if (i.finish) return i.finish;
+      if (i.foil) return 'foil';
+      return 'nonfoil';
+    }
+
+
+    // ---------- list kinds (collection vs watch) ----------
+    function folderKind(f) {
+      if (!f) return 'collection';
+      return f.kind === 'watch' ? 'watch' : 'collection';
+    }
+    function folderById(id) {
+      return state.folders.find(f => f.id === id);
+    }
+    function foldersOfKind(kind) {
+      return state.folders.filter(f => folderKind(f) === kind)
+        .sort((a, b) => (a.sortOrder || 0) - (b.sortOrder || 0));
+    }
+    function isWatchFolder(folderId) {
+      const f = folderById(folderId);
+      return folderKind(f) === 'watch';
+    }
+    function currentListKind() {
+      if (state.tab === 'watch') return 'watch';
+      if (state.tab === 'collection') return 'collection';
+      // sets/search: infer from active folder
+      return isWatchFolder(state.activeFolderId) ? 'watch' : 'collection';
+    }
+    function listTabForFolder(folderId) {
+      return isWatchFolder(folderId) ? 'watch' : 'collection';
+    }
+    function updatePaidVisibility(folderId) {
+      const watch = isWatchFolder(folderId);
+      const modalPaid = document.getElementById('modalPaidField');
+      const pastePaid = document.getElementById('pastePaidWrap');
+      const bulkList = document.getElementById('bulkCardList');
+      const bulkHeaders = document.getElementById('bulkHeaders');
+      const bulkHint = document.getElementById('bulkPaidHint');
+      if (modalPaid) modalPaid.style.display = watch ? 'none' : '';
+      if (pastePaid) pastePaid.style.display = watch ? 'none' : '';
+      if (bulkList) bulkList.classList.toggle('watch-mode', watch);
+      if (bulkHeaders) bulkHeaders.classList.toggle('watch-mode', watch);
+      if (bulkHint) bulkHint.style.display = watch ? 'none' : '';
+      if (watch) {
+        const mp = document.getElementById('modalPaid');
+        const pp = document.getElementById('pastePaid');
+        if (mp) mp.value = '';
+        if (pp) pp.value = '';
+      }
+    }
+    function onBulkFolderChange() {
+      const folderId = document.getElementById('bulkFolder').value;
+      updatePaidVisibility(folderId);
+    }
+    function renderBulkCardList() {
+      const list = document.getElementById('bulkCardList');
+      if (!list) return;
+      const cur = state.currency === 'CAD' ? 'CA$' : '$';
+      list.innerHTML = state.bulkCards.map((c, idx) => `
+        <div class="bulk-card-row" data-idx="${idx}">
+          <div>
+            <div class="bname">${escapeHtml(c.name)}</div>
+            <div class="bmeta">${escapeHtml((c.set || '').toUpperCase())} #${escapeHtml(c.collectorNumber || '')}</div>
+          </div>
+          <input type="number" class="bulk-qty" data-idx="${idx}" value="1" min="1" max="999" />
+          <input type="number" class="bulk-paid-col bulk-paid" data-idx="${idx}" min="0" step="0.01" placeholder="${cur}0.00" />
+        </div>
+      `).join('');
+    }
+
+    // ---------- tabs ----------
+    function switchTab(tab, opts = {}) {
+      state.tab = tab;
+      state.selected.clear();
+      updateBulkBars();
+      closeSortPanel();
+      document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t.dataset.tab === tab));
+      const isList = tab === 'collection' || tab === 'watch';
+      document.getElementById('panel-collection').style.display = isList ? 'block' : 'none';
+      document.getElementById('panel-sets').style.display = tab === 'sets' ? 'block' : 'none';
+      document.getElementById('panel-search').style.display = tab === 'search' ? 'block' : 'none';
+      const sub = document.getElementById('collectionSubbar');
+      const fab = document.getElementById('sortFab');
+      if (sub) sub.classList.toggle('show', isList);
+      if (fab) fab.style.display = isList ? 'flex' : 'none';
+
+      // Ensure active folder matches the tab's list kind
+      if (isList && !opts.keepFolder) {
+        const kind = tab === 'watch' ? 'watch' : 'collection';
+        if (!isWatchFolder(state.activeFolderId) && kind === 'watch' ||
+            isWatchFolder(state.activeFolderId) && kind === 'collection') {
+          const first = foldersOfKind(kind)[0];
+          if (first) state.activeFolderId = first.id;
+        }
+      }
+      renderFolders();
+      if (tab === 'sets' && !state.sets.length) loadSets();
+      if (isList) renderCollection();
+    }
+    function toggleSortPanel() {
+      document.getElementById('sortPanel').classList.toggle('open');
+    }
+    function closeSortPanel() {
+      document.getElementById('sortPanel')?.classList.remove('open');
+    }
+    function setSort(mode) {
+      state.sortMode = mode;
+      document.querySelectorAll('.sort-option').forEach(el => {
+        el.classList.toggle('active', el.dataset.sort === mode);
+      });
+      closeSortPanel();
+      if (state.tab === 'collection' || state.tab === 'watch') renderCollection();
+    }
+    function sortItems(items) {
+      const mode = state.sortMode || 'number-asc';
+      const list = items.slice();
+      const num = (v) => {
+        const n = parseInt(String(v || '').replace(/[^\d]/g, ''), 10);
+        return isNaN(n) ? 999999 : n;
+      };
+      list.sort((a, b) => {
+        if (mode === 'name-asc') return (a.name || '').localeCompare(b.name || '');
+        if (mode === 'name-desc') return (b.name || '').localeCompare(a.name || '');
+        if (mode === 'number-asc') {
+          const c = num(a.collectorNumber) - num(b.collectorNumber);
+          return c !== 0 ? c : (a.name || '').localeCompare(b.name || '');
+        }
+        if (mode === 'number-desc') {
+          const c = num(b.collectorNumber) - num(a.collectorNumber);
+          return c !== 0 ? c : (a.name || '').localeCompare(b.name || '');
+        }
+        if (mode === 'price-asc' || mode === 'price-desc') {
+          const pa = priceForFinish(a, finishFromItem(a));
+          const pb = priceForFinish(b, finishFromItem(b));
+          const va = pa == null ? (mode === 'price-asc' ? Infinity : -Infinity) : pa;
+          const vb = pb == null ? (mode === 'price-asc' ? Infinity : -Infinity) : pb;
+          return mode === 'price-asc' ? va - vb : vb - va;
+        }
+        return 0;
+      });
+      return list;
+    }
+
+    // ---------- folders ----------
+    function renderFolders() {
+      const bar = document.getElementById('foldersBar');
+      const tab = state.tab;
+      let folders = [];
+      let showAdd = false;
+      let chipPrefix = false;
+
+      if (tab === 'collection') {
+        folders = foldersOfKind('collection');
+        showAdd = true;
+      } else if (tab === 'watch') {
+        folders = foldersOfKind('watch');
+        showAdd = true;
+      } else {
+        // Browse Sets / Search: show ALL folders so you can jump to any
+        folders = [
+          ...foldersOfKind('collection'),
+          ...foldersOfKind('watch')
+        ];
+        chipPrefix = true;
+        showAdd = false;
+      }
+
+      const chips = folders.map(f => {
+        const count = state.items.filter(i => i.folderId === f.id).reduce((s, i) => s + i.quantity, 0);
+        const kindTag = chipPrefix
+          ? `<span class="folder-kind">${folderKind(f) === 'watch' ? 'Watch' : 'Owned'}</span>`
+          : '';
+        const delBtn = (tab === 'collection' || tab === 'watch')
+          ? `<button type="button" class="folder-x" title="Delete folder" onclick="event.stopPropagation(); deleteFolder('${f.id}')">×</button>`
+          : '';
+        const watchCls = folderKind(f) === 'watch' ? ' watch-chip' : '';
+        return `<div class="folder-chip${watchCls} ${f.id === state.activeFolderId ? 'active' : ''}" onclick="selectFolder('${f.id}')">
+          ${kindTag}
+          <span>${escapeHtml(f.name)}</span>
+          <span class="count">${count}</span>
+          ${delBtn}
+        </div>`;
+      }).join('');
+
+      const addBtn = showAdd
+        ? `<button type="button" class="folder-add-btn" onclick="openNewFolderModal()">+ Folder</button>`
+        : '';
+      bar.innerHTML = chips + addBtn;
+    }
+    function selectFolder(id) {
+      state.activeFolderId = id;
+      const targetTab = listTabForFolder(id);
+      // Always navigate to the list tab that owns this folder when not already there
+      if (state.tab !== targetTab) {
+        switchTab(targetTab, { keepFolder: true });
+        return;
+      }
+      renderFolders();
+      renderCollection();
+    }
+    function deleteFolder(id) {
+      const folder = folderById(id);
+      if (!folder) return;
+      const kind = folderKind(folder);
+      if (foldersOfKind(kind).length <= 1) {
+        toast(kind === 'watch' ? 'You need at least one Watch List folder' : 'You need at least one Collection folder');
+        return;
+      }
+      const count = state.items.filter(i => i.folderId === id).length;
+      const msg = count
+        ? `Delete "${folder.name}" and its ${count} card entr${count === 1 ? 'y' : 'ies'}?`
+        : `Delete folder "${folder.name}"?`;
+      if (!confirm(msg)) return;
+      state.items = state.items.filter(i => i.folderId !== id);
+      state.folders = state.folders.filter(f => f.id !== id);
+      if (state.activeFolderId === id) {
+        const next = foldersOfKind(kind)[0];
+        state.activeFolderId = next ? next.id : state.folders[0].id;
+      }
+      saveState();
+      renderFolders();
+      if (state.tab === 'collection' || state.tab === 'watch') renderCollection();
+      toast('Folder deleted');
+    }
+    function openNewFolderModal() {
+      document.getElementById('folderNameInput').value = '';
+      openModal('folderModal');
+      setTimeout(() => document.getElementById('folderNameInput').focus(), 80);
+    }
+    function createFolder() {
+      const name = document.getElementById('folderNameInput').value.trim();
+      if (!name) return toast('Enter a name');
+      const kind = (state.tab === 'watch') ? 'watch' : 'collection';
+      // If creating while on sets/search, use collection by default
+      const folder = {
+        id: crypto.randomUUID(),
+        name,
+        kind,
+        sortOrder: state.folders.length
+      };
+      state.folders.push(folder);
+      state.activeFolderId = folder.id;
+      saveState();
+      closeModal('folderModal');
+      // Stay on / switch to the list that owns this folder
+      if (state.tab !== kind) switchTab(kind, { keepFolder: true });
+      else {
+        renderFolders();
+        renderCollection();
+      }
+      toast(`Created "${name}"`);
+    }
+    function populateFolderSelects(preferredId) {
+      const selected = preferredId || state.activeFolderId;
+      const col = foldersOfKind('collection');
+      const wat = foldersOfKind('watch');
+      const options = [
+        '<optgroup label="Collection (owned)">',
+        ...col.map(f => `<option value="${f.id}" ${f.id === selected ? 'selected' : ''}>${escapeHtml(f.name)}</option>`),
+        '</optgroup>',
+        '<optgroup label="Watch List (want)">',
+        ...wat.map(f => `<option value="${f.id}" ${f.id === selected ? 'selected' : ''}>${escapeHtml(f.name)}</option>`),
+        '</optgroup>'
+      ].join('');
+      ['modalFolder', 'bulkFolder', 'pasteFolder'].forEach(id => {
+        const sel = document.getElementById(id);
+        if (!sel) return;
+        sel.innerHTML = options;
+        sel.onchange = () => updatePaidVisibility(sel.value);
+      });
+      updatePaidVisibility(selected);
+    }
+
+    // ---------- collection view + prices ----------
+    function renderCollection() {
+      const el = document.getElementById('collectionContent');
+      const valueBar = document.getElementById('valueBar');
+      const subbar = document.getElementById('collectionSubbar');
+      let items = state.items.filter(i => i.folderId === state.activeFolderId);
+
+      if (subbar) subbar.classList.toggle('show', state.tab === 'collection' || state.tab === 'watch');
+
+      if (!items.length) {
+        valueBar.classList.remove('show');
+        const isWatch = state.tab === 'watch' || isWatchFolder(state.activeFolderId);
+        el.innerHTML = `<div class="empty">This folder is empty.<br><br>
+          ${isWatch
+            ? 'Add cards you <b>want</b> from <b>Browse Sets</b> or <b>Search</b>.'
+            : 'Use <b>Browse Sets</b> or <b>Paste List</b> to add cards you own.'}</div>`;
+        return;
+      }
+
+      items = sortItems(items);
+
+      // totals (market price respects foil / surge finish)
+      let totalPaid = 0, totalNow = 0, hasPaid = false, hasNow = false;
+      for (const i of items) {
+        if (i.purchasePrice != null) {
+          totalPaid += i.purchasePrice * i.quantity;
+          hasPaid = true;
+        }
+        const mkt = priceForFinish(i, finishFromItem(i));
+        if (mkt != null) {
+          totalNow += mkt * i.quantity;
+          hasNow = true;
+        }
+      }
+      const diff = totalNow - totalPaid;
+      let diffClass = 'flat';
+      let diffText = fmtMoney(0);
+      if (hasPaid && hasNow) {
+        if (diff > 0.005) { diffClass = 'up'; diffText = '+' + fmtMoney(diff); }
+        else if (diff < -0.005) { diffClass = 'down'; diffText = fmtMoney(diff); }
+        else { diffText = fmtMoney(0); }
+      } else {
+        diffText = '—';
+      }
+      const cardCount = items.reduce((s, i) => s + i.quantity, 0);
+
+      valueBar.classList.add('show');
+      const isWatchList = state.tab === 'watch' || isWatchFolder(state.activeFolderId);
+      if (isWatchList) {
+        valueBar.innerHTML = `
+          <div class="value-stat market">
+            <span class="value-label">Market Value</span>
+            <span class="value-num">${hasNow ? fmtMoney(totalNow) : '—'}</span>
+          </div>
+          <div class="value-stat cards">
+            <span class="value-label">Wanted</span>
+            <span class="value-num muted">${cardCount}</span>
+          </div>
+        `;
+      } else {
+        valueBar.innerHTML = `
+          <div class="value-stat paid">
+            <span class="value-label">Paid</span>
+            <span class="value-num muted">${hasPaid ? fmtMoney(totalPaid) : '—'}</span>
+          </div>
+          <div class="value-stat market">
+            <span class="value-label">Market</span>
+            <span class="value-num">${hasNow ? fmtMoney(totalNow) : '—'}</span>
+          </div>
+          <div class="value-stat gain ${diffClass}">
+            <span class="value-label">Gain / Loss</span>
+            <span class="value-num ${diffClass === 'flat' ? 'muted' : diffClass}">${diffText}</span>
+          </div>
+          <div class="value-stat cards">
+            <span class="value-label">Cards</span>
+            <span class="value-num muted">${cardCount}</span>
+          </div>
+        `;
+      }
+
+      el.innerHTML = `<div class="grid">${items.map(i => ownedCardHtml(i)).join('')}</div>`;
+      document.querySelectorAll('.sort-option').forEach(el => {
+        el.classList.toggle('active', el.dataset.sort === state.sortMode);
+      });
+    }
+
+    function formatAddedDate(ts) {
+      if (!ts) return '';
+      try {
+        const d = new Date(ts);
+        if (isNaN(d.getTime())) return '';
+        // e.g. Aug 26, 2026
+        return d.toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' });
+      } catch (e) { return ''; }
+    }
+
+    function ownedCardHtml(i) {
+      const paid = i.purchasePrice; // USD stored
+      const finish = finishFromItem(i);
+      const market = priceForFinish(i, finish); // USD market
+      const num = i.collectorNumber ? `#${i.collectorNumber}` : '';
+      const title = num ? `${num} — ${i.name}` : i.name;
+      const addedStr = formatAddedDate(i.addedAt);
+
+      const watchItem = isWatchFolder(i.folderId);
+
+      // Overlay (bottom-right on image): foil/SF pip + CURRENT MARKET value
+      let overlay = '';
+      if (market != null || finish !== 'nonfoil') {
+        let foilPip = '';
+        if (finish === 'surge') foilPip = `<span class="foil-pip sf">SF</span>`;
+        else if (finish === 'foil') foilPip = `<span class="foil-pip">F</span>`;
+        const mktTxt = market != null ? `<span class="paid-amt">${fmtMoney(market)}</span>` : '';
+        if (foilPip || mktTxt) {
+          overlay = `<div class="paid-overlay">${foilPip}${mktTxt}</div>`;
+        }
+      }
+
+      // Row: ×qty ····· [diff] Paid $x.xx  (no paid/diff on watch list)
+      let paidTxt = '';
+      let diffHtml = '';
+      if (!watchItem) {
+        paidTxt = paid != null
+          ? `<span class="price-now">Paid ${fmtMoney(paid)}</span>`
+          : '';
+        if (paid != null && market != null) {
+          const d = (market - paid) * i.quantity;
+          let cls = 'flat', txt = fmtMoney(0);
+          if (d > 0.005) { cls = 'up'; txt = '+' + fmtMoney(d); }
+          else if (d < -0.005) { cls = 'down'; txt = fmtMoney(d); }
+          diffHtml = `<span class="price-diff ${cls}">${txt}</span>`;
+        } else if (paid != null) {
+          diffHtml = `<span class="price-diff flat" style="visibility:hidden">—</span>`;
+        }
+      }
+
+      const metaParts = [(i.set || '').toUpperCase(), i.condition || 'NM'];
+      if (addedStr) metaParts.push(addedStr);
+
+      return `<div class="card" onclick="openEditItem('${i.id}')">
+        <div class="card-img-wrap">
+          <img src="${i.image || ''}" loading="lazy" alt="" decoding="async" onerror="this.style.opacity=0.3" />
+          ${overlay}
+        </div>
+        <div class="card-body">
+          <div class="card-name">${escapeHtml(title)}</div>
+          <div class="card-meta">${metaParts.map(escapeHtml).join(' · ')}</div>
+          <div class="card-row">
+            <span class="card-qty">×${i.quantity}</span>
+            ${diffHtml}
+            ${paidTxt}
+          </div>
+        </div>
+      </div>`;
+    }
+
+    let priceRefreshInFlight = false;
+
+    /** Refresh market prices (+ images) from Scryfall.
+     *  scope: 'folder' = active folder only, 'all' = entire collection
+     *  silent: less noisy toasts (used for automatic on-open refresh)
+     */
+    async function refreshPrices(scope = 'folder', silent = false) {
+      if (priceRefreshInFlight) return;
+      const items = state.items.filter(i => {
+        if (!i.scryfallId || String(i.scryfallId).startsWith('import-')) return false;
+        if (scope === 'folder') return i.folderId === state.activeFolderId;
+        return true;
+      });
+      if (!items.length) {
+        if (!silent) toast('No cards with Scryfall IDs to refresh');
+        return;
+      }
+
+      priceRefreshInFlight = true;
+      if (!silent) toast(`Refreshing prices...`);
+      else toast('Updating market prices...');
+
+      let updated = 0;
+      const ids = [...new Set(items.map(i => i.scryfallId))];
+      for (let i = 0; i < ids.length; i += 75) {
+        const batch = ids.slice(i, i + 75);
+        try {
+          const res = await fetch('https://api.scryfall.com/cards/collection', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ identifiers: batch.map(id => ({ id })) })
+          });
+          if (!res.ok) continue;
+          const data = await res.json();
+          for (const c of (data.data || [])) {
+            const usd = c.prices?.usd != null && c.prices.usd !== '' ? parseFloat(c.prices.usd) : null;
+            const usdFoil = c.prices?.usd_foil != null && c.prices.usd_foil !== '' ? parseFloat(c.prices.usd_foil) : null;
+            const uris = c.image_uris || c.card_faces?.[0]?.image_uris || {};
+            const img = uris.png || uris.large || uris.normal || '';
+            state.items.forEach(item => {
+              if (item.scryfallId === c.id) {
+                item.price = usd;
+                item.priceFoil = usdFoil;
+                if (img) item.image = img;
+                updated++;
+              }
+            });
+          }
+        } catch (e) {}
+        await new Promise(r => setTimeout(r, 120));
+      }
+      store.setItem('mtg_tracker_last_price_refresh', String(Date.now()));
+      saveState();
+      if (state.tab === 'collection' || state.tab === 'watch') renderCollection();
+      renderFolders();
+      priceRefreshInFlight = false;
+      toast(silent ? 'Prices updated' : `Updated prices on ${updated} entries`);
+    }
+
+    function refreshFolderPrices() {
+      return refreshPrices('folder', false);
+    }
+
+    /** Auto-refresh on open — like ManaBox. Always runs once per page load. */
+    async function autoRefreshOnOpen() {
+      const hasCards = state.items.some(i => i.scryfallId && !String(i.scryfallId).startsWith('import-'));
+      if (!hasCards) return;
+      // Refresh entire collection in the background
+      await refreshPrices('all', true);
+    }
+
+    // ---------- sets browser ----------
+    async function loadSets() {
+      const area = document.getElementById('setListArea');
+      try {
+        const res = await fetch('https://api.scryfall.com/sets');
+        const data = await res.json();
+        state.sets = (data.data || [])
+          .filter(s => !s.digital && s.card_count > 0)
+          .sort((a, b) => (b.released_at || '').localeCompare(a.released_at || ''));
+        renderSetList();
+      } catch (e) {
+        area.innerHTML = `<div class="empty">Could not load sets. Check your connection.</div>`;
+      }
+    }
+    function renderSetList() {
+      const filter = (document.getElementById('setFilter').value || '').toLowerCase();
+      const list = state.sets.filter(s =>
+        !filter || s.name.toLowerCase().includes(filter) || s.code.toLowerCase().includes(filter)
+      );
+      const area = document.getElementById('setListArea');
+      area.style.display = 'block';
+      document.getElementById('setCardsArea').style.display = 'none';
+      if (!list.length) {
+        area.innerHTML = `<div class="empty">No sets match</div>`;
+        return;
+      }
+      area.innerHTML = `<div class="set-list">${list.slice(0, 80).map(s => `
+        <div class="set-row" onclick="openSet('${s.code}', '${escapeHtml(s.name).replace(/'/g, "\\'")}')">
+          <div>
+            <div class="set-name">${escapeHtml(s.name)}</div>
+            <div class="set-code">${s.code.toUpperCase()} · ${s.card_count} cards · ${s.released_at || ''}</div>
+          </div>
+          <span style="color:var(--text-dim)">›</span>
+        </div>
+      `).join('')}</div>`;
+    }
+    async function openSet(code, name) {
+      state.currentSetCode = code;
+      state.selected.clear();
+      updateBulkBars();
+      document.getElementById('setListArea').style.display = 'none';
+      document.getElementById('setCardsArea').style.display = 'block';
+      document.getElementById('currentSetName').textContent = name;
+      document.getElementById('setCardsGrid').innerHTML = `<div class="loading">Loading cards...</div>`;
+
+      try {
+        let cards = [];
+        let url = `https://api.scryfall.com/cards/search?q=set:${code}&unique=prints&order=set`;
+        while (url) {
+          const res = await fetch(url);
+          if (!res.ok) break;
+          const data = await res.json();
+          cards = cards.concat((data.data || []).map(normalizeScryfall));
+          url = data.has_more ? data.next_page : null;
+          if (url) await new Promise(r => setTimeout(r, 100));
+        }
+        state.currentSetCards = cards;
+        renderSetCards();
+      } catch (e) {
+        document.getElementById('setCardsGrid').innerHTML = `<div class="empty">Failed to load cards</div>`;
+      }
+    }
+    function backToSetList() {
+      state.currentSetCode = null;
+      state.currentSetCards = [];
+      state.selected.clear();
+      updateBulkBars();
+      document.getElementById('setCardsArea').style.display = 'none';
+      document.getElementById('setListArea').style.display = 'block';
+    }
+    function renderSetCards() {
+      const grid = document.getElementById('setCardsGrid');
+      if (!state.currentSetCards.length) {
+        grid.innerHTML = `<div class="empty">No cards</div>`;
+        return;
+      }
+      grid.innerHTML = state.currentSetCards.map(c => selectableCardHtml(c)).join('');
+    }
+
+    // ---------- search ----------
+    let searchTimer = null;
+    document.getElementById('searchInput')?.addEventListener('input', e => {
+      clearTimeout(searchTimer);
+      if (e.target.value.trim().length >= 2) searchTimer = setTimeout(doSearch, 450);
+    });
+    document.getElementById('searchInput')?.addEventListener('keydown', e => {
+      if (e.key === 'Enter') doSearch();
+    });
+
+    async function doSearch() {
+      const q = document.getElementById('searchInput').value.trim();
+      if (q.length < 2) return;
+      const status = document.getElementById('searchStatus');
+      status.style.display = 'block';
+      state.selected.clear();
+      updateBulkBars();
+      try {
+        const res = await fetch(`https://api.scryfall.com/cards/search?q=${encodeURIComponent(q)}&unique=prints&order=name`);
+        if (res.status === 404) state.searchResults = [];
+        else if (!res.ok) throw new Error('fail');
+        else {
+          const data = await res.json();
+          state.searchResults = (data.data || []).slice(0, 48).map(normalizeScryfall);
+        }
+      } catch (e) {
+        toast('Search failed');
+        state.searchResults = [];
+      }
+      status.style.display = 'none';
+      renderSearch();
+    }
+    function renderSearch() {
+      const el = document.getElementById('searchContent');
+      if (!state.searchResults.length) {
+        el.innerHTML = `<div class="empty">No results</div>`;
+        return;
+      }
+      el.innerHTML = `<div class="grid">${state.searchResults.map(c => selectableCardHtml(c)).join('')}</div>`;
+    }
+
+    // ---------- selection / bulk ----------
+    function selectableCardHtml(c) {
+      const selected = state.selected.has(c.scryfallId) ? 'selected' : '';
+      let price = '';
+      if (c.price != null) price = fmtMoney(c.price);
+      if (c.priceFoil != null) price += (price ? ' / ' : '') + 'F ' + fmtMoney(c.priceFoil);
+      const num = c.collectorNumber ? `#${c.collectorNumber}` : '';
+      const title = num ? `${num} — ${c.name}` : c.name;
+      return `<div class="card ${selected}" onclick="toggleSelect('${c.scryfallId}')" data-id="${c.scryfallId}">
+        <div class="check">✓</div>
+        <div class="card-img-wrap">
+          <img src="${c.image || ''}" loading="lazy" alt="" decoding="async" onerror="this.style.opacity=0.3" />
+        </div>
+        <div class="card-body">
+          <div class="card-name">${escapeHtml(title)}</div>
+          <div class="card-meta">${(c.set || '').toUpperCase()} · ${price}</div>
+        </div>
+      </div>`;
+    }
+    function toggleSelect(id) {
+      if (state.selected.has(id)) state.selected.delete(id);
+      else state.selected.add(id);
+      updateBulkBars();
+      if (state.tab === 'sets') renderSetCards();
+      if (state.tab === 'search') renderSearch();
+    }
+    function clearSelection() {
+      state.selected.clear();
+      updateBulkBars();
+      if (state.tab === 'sets') renderSetCards();
+      if (state.tab === 'search') renderSearch();
+    }
+    function updateBulkBars() {
+      const n = state.selected.size;
+      const setBar = document.getElementById('setBulkBar');
+      const searchBar = document.getElementById('searchBulkBar');
+      if (setBar) {
+        setBar.classList.toggle('show', n > 0 && state.tab === 'sets');
+        document.getElementById('setSelectedCount').textContent = `${n} selected`;
+      }
+      if (searchBar) {
+        searchBar.classList.toggle('show', n > 0 && state.tab === 'search');
+        document.getElementById('searchSelectedCount').textContent = `${n} selected`;
+      }
+    }
+    function bulkAddSelected() {
+      if (!state.selected.size) return;
+      const source = state.tab === 'sets' ? state.currentSetCards : state.searchResults;
+      state.bulkCards = source.filter(c => state.selected.has(c.scryfallId));
+      document.getElementById('bulkCount').textContent = state.bulkCards.length;
+      document.getElementById('bulkFoil').value = 'nonfoil';
+      document.getElementById('bulkCondition').value = 'NM';
+      populateFolderSelects(state.activeFolderId);
+      renderBulkCardList();
+      onBulkFolderChange();
+      openModal('bulkModal');
+    }
+    function confirmBulkAdd() {
+      const folderId = document.getElementById('bulkFolder').value;
+      const watch = isWatchFolder(folderId);
+      const finish = document.getElementById('bulkFoil').value || 'nonfoil';
+      const foil = finish !== 'nonfoil';
+      const condition = document.getElementById('bulkCondition').value;
+      let added = 0;
+      state.bulkCards.forEach((c, idx) => {
+        const qtyEl = document.querySelector(`.bulk-qty[data-idx="${idx}"]`);
+        const paidEl = document.querySelector(`.bulk-paid[data-idx="${idx}"]`);
+        const quantity = Math.max(1, parseInt(qtyEl?.value) || 1);
+        const paidRaw = paidEl?.value;
+        const purchasePrice = watch || !paidRaw ? null : toUsd(parseFloat(paidRaw));
+        const existing = state.items.find(i =>
+          i.scryfallId === c.scryfallId && i.folderId === folderId && finishFromItem(i) === finish
+        );
+        if (existing) {
+          existing.quantity += quantity;
+          if (purchasePrice != null) {
+            existing.purchasePrice = purchasePrice;
+            existing.purchaseCurrency = 'USD';
+          }
+        } else {
+          state.items.push({
+            id: crypto.randomUUID(),
+            scryfallId: c.scryfallId,
+            name: c.name, set: c.set, setName: c.setName,
+            collectorNumber: c.collectorNumber, image: c.image,
+            price: c.price, priceFoil: c.priceFoil,
+            folderId, quantity, foil, finish, condition,
+            purchasePrice, purchaseCurrency: 'USD',
+            addedAt: Date.now()
+          });
+        }
+        added++;
+      });
+      saveState();
+      closeModal('bulkModal');
+      state.selected.clear();
+      updateBulkBars();
+      renderFolders();
+      toast(`Added ${added} cards`);
+      if (state.tab === 'sets') renderSetCards();
+      if (state.tab === 'search') renderSearch();
+      if (state.tab === 'collection' || state.tab === 'watch') renderCollection();
+    }
+
+    // ---------- single card add/edit ----------
+    function openAddCard(card) {
+      state.pendingCard = card;
+      state.editingItemId = null;
+      state.browseIds = [];
+      state.browseIndex = -1;
+      document.getElementById('modalSaveBtn').textContent = 'Add';
+      document.getElementById('modalDeleteBtn').style.display = 'none';
+      fillCardModal(card);
+      updateCardNavUI();
+      openModal('cardModal');
+    }
+    function openEditItem(itemId, direction) {
+      const item = state.items.find(i => i.id === itemId);
+      if (!item) return;
+      // Build browse list from current folder order
+      // Browse within the same folder
+      const folderItems = state.items.filter(i => i.folderId === (item.folderId || state.activeFolderId));
+      state.browseIds = folderItems.map(i => i.id);
+      state.browseIndex = state.browseIds.indexOf(itemId);
+      state.editingItemId = itemId;
+      state.pendingCard = null;
+      document.getElementById('modalSaveBtn').textContent = 'Save';
+      document.getElementById('modalDeleteBtn').style.display = 'block';
+      fillCardModal(item, true, direction);
+      updateCardNavUI();
+      openModal('cardModal');
+    }
+    function updateCardNavUI() {
+      const prev = document.getElementById('peekPrev');
+      const next = document.getElementById('peekNext');
+      const prevBtn = document.getElementById('navPrevBtn');
+      const nextBtn = document.getElementById('navNextBtn');
+      const prevImg = document.getElementById('peekPrevImg');
+      const nextImg = document.getElementById('peekNextImg');
+      const ids = state.browseIds || [];
+      const idx = state.browseIndex;
+
+      const hasPrev = idx > 0;
+      const hasNext = idx >= 0 && idx < ids.length - 1;
+
+      prev.classList.toggle('visible', hasPrev);
+      next.classList.toggle('visible', hasNext);
+      prevBtn.classList.toggle('visible', hasPrev);
+      nextBtn.classList.toggle('visible', hasNext);
+
+      if (hasPrev) {
+        const p = state.items.find(i => i.id === ids[idx - 1]);
+        prevImg.src = p?.image || '';
+        prevImg.style.opacity = p?.image ? '1' : '0.3';
+      } else {
+        prevImg.removeAttribute('src');
+      }
+      if (hasNext) {
+        const n = state.items.find(i => i.id === ids[idx + 1]);
+        nextImg.src = n?.image || '';
+        nextImg.style.opacity = n?.image ? '1' : '0.3';
+      } else {
+        nextImg.removeAttribute('src');
+      }
+    }
+    function navCard(delta) {
+      const ids = state.browseIds || [];
+      const nextIdx = (state.browseIndex ?? -1) + delta;
+      if (nextIdx < 0 || nextIdx >= ids.length) return;
+      // Switch to neighbor (does not auto-save current edits)
+      openEditItem(ids[nextIdx], delta > 0 ? 'left' : 'right');
+    }
+    function fillCardModal(c, isItem, direction) {
+      const img = document.getElementById('modalCardImg');
+      img.classList.remove('slide-left', 'slide-right');
+      if (c.image) {
+        img.src = c.image;
+        img.classList.add('show');
+        if (direction === 'left') {
+          // force reflow so animation restarts
+          void img.offsetWidth;
+          img.classList.add('slide-left');
+        } else if (direction === 'right') {
+          void img.offsetWidth;
+          img.classList.add('slide-right');
+        }
+      } else {
+        img.removeAttribute('src');
+        img.classList.remove('show');
+      }
+      const num = c.collectorNumber ? `#${c.collectorNumber}` : '';
+      document.getElementById('modalCardName').textContent = num ? `${num} — ${c.name}` : c.name;
+      document.getElementById('modalCardSet').textContent =
+        `${c.setName || ''} (${(c.set || '').toUpperCase()})`;
+      populateFolderSelects(isItem ? c.folderId : state.activeFolderId);
+      if (isItem) {
+        document.getElementById('modalFolder').value = c.folderId;
+        document.getElementById('modalQty').value = c.quantity;
+        document.getElementById('modalPaid').value = c.purchasePrice != null
+          ? (fromUsd(c.purchasePrice)).toFixed(2)
+          : '';
+        document.getElementById('modalFoil').value = finishFromItem(c);
+        document.getElementById('modalCondition').value = c.condition || 'NM';
+        updatePaidVisibility(c.folderId);
+      } else {
+        document.getElementById('modalQty').value = 1;
+        document.getElementById('modalPaid').value = '';
+        document.getElementById('modalFoil').value = 'nonfoil';
+        document.getElementById('modalCondition').value = 'NM';
+        updatePaidVisibility(state.activeFolderId);
+      }
+    }
+    function saveCard() {
+      const folderId = document.getElementById('modalFolder').value;
+      const quantity = parseInt(document.getElementById('modalQty').value) || 1;
+      const folderIdForPaid = document.getElementById('modalFolder').value;
+      const paidRaw = document.getElementById('modalPaid').value;
+      // User types in active currency; store as USD — never for watch list
+      const purchasePrice = isWatchFolder(folderIdForPaid) || paidRaw === '' ? null : toUsd(parseFloat(paidRaw));
+      const finish = document.getElementById('modalFoil').value || 'nonfoil';
+      const foil = finish !== 'nonfoil';
+      const condition = document.getElementById('modalCondition').value;
+      if (state.editingItemId) {
+        const item = state.items.find(i => i.id === state.editingItemId);
+        if (item) {
+          item.folderId = folderId;
+          item.quantity = quantity;
+          item.purchasePrice = purchasePrice;
+          item.purchaseCurrency = 'USD';
+          item.foil = foil;
+          item.finish = finish;
+          item.condition = condition;
+          toast('Updated');
+        }
+      } else if (state.pendingCard) {
+        const c = state.pendingCard;
+        const existing = state.items.find(i =>
+          i.scryfallId === c.scryfallId && i.folderId === folderId && finishFromItem(i) === finish
+        );
+        if (existing) {
+          existing.quantity += quantity;
+          if (purchasePrice != null) {
+            existing.purchasePrice = purchasePrice;
+            existing.purchaseCurrency = 'USD';
+          }
+          toast(`Qty now ×${existing.quantity}`);
+        } else {
+          state.items.push({
+            id: crypto.randomUUID(),
+            scryfallId: c.scryfallId,
+            name: c.name, set: c.set, setName: c.setName,
+            collectorNumber: c.collectorNumber, image: c.image,
+            price: c.price, priceFoil: c.priceFoil,
+            folderId, quantity, foil, finish, condition,
+            purchasePrice, purchaseCurrency: 'USD',
+            addedAt: Date.now()
+          });
+          toast('Added');
+        }
+      }
+      saveState();
+      closeModal('cardModal');
+      renderFolders();
+      if (state.tab === 'collection' || state.tab === 'watch') renderCollection();
+    }
+    function deleteCard() {
+      if (!state.editingItemId || !confirm('Remove this card?')) return;
+      state.items = state.items.filter(i => i.id !== state.editingItemId);
+      saveState();
+      closeModal('cardModal');
+      renderFolders();
+      renderCollection();
+      toast('Removed');
+    }
+
+    // ---------- paste list ----------
+    function openPasteModal() {
+      populateFolderSelects();
+      document.getElementById('pasteText').value = '';
+      document.getElementById('pastePaid').value = '';
+      openModal('pasteModal');
+    }
+    async function processPasteList() {
+      const text = document.getElementById('pasteText').value.trim();
+      if (!text) return toast('Paste some cards first');
+      const folderId = document.getElementById('pasteFolder').value;
+      const pasteFolderId = document.getElementById('pasteFolder').value;
+      const paidRaw = document.getElementById('pastePaid').value;
+      const purchasePrice = isWatchFolder(pasteFolderId) || paidRaw === '' ? null : toUsd(parseFloat(paidRaw));
+      const lines = text.split(/\r?\n/).map(l => l.trim()).filter(Boolean);
+      closeModal('pasteModal');
+      toast(`Looking up ${lines.length} cards...`);
+
+      let added = 0, failed = 0;
+      for (const line of lines) {
+        let qty = 1, name = line, setCode = '', num = '';
+        let m = line.match(/^(\d+)\s*x?\s+(.+)$/i);
+        if (m) { qty = parseInt(m[1]); name = m[2]; }
+        m = name.match(/^(.+?)\s*\(([a-z0-9]+)\)\s*(\d+\w*)?$/i);
+        if (m) { name = m[1].trim(); setCode = m[2]; num = m[3] || ''; }
+
+        try {
+          let card = null;
+          if (setCode && num) {
+            const res = await fetch(`https://api.scryfall.com/cards/${setCode.toLowerCase()}/${num}`);
+            if (res.ok) card = normalizeScryfall(await res.json());
+          }
+          if (!card) {
+            const res = await fetch(`https://api.scryfall.com/cards/named?fuzzy=${encodeURIComponent(name)}`);
+            if (res.ok) card = normalizeScryfall(await res.json());
+          }
+          if (card) {
+            const existing = state.items.find(i =>
+              i.scryfallId === card.scryfallId && i.folderId === folderId && !i.foil
+            );
+            if (existing) {
+              existing.quantity += qty;
+              if (purchasePrice != null) {
+                existing.purchasePrice = purchasePrice;
+                existing.purchaseCurrency = 'USD';
+              }
+            } else {
+              state.items.push({
+                id: crypto.randomUUID(),
+                scryfallId: card.scryfallId,
+                name: card.name, set: card.set, setName: card.setName,
+                collectorNumber: card.collectorNumber, image: card.image,
+                price: card.price, priceFoil: card.priceFoil,
+                folderId, quantity: qty, foil: false, finish: 'nonfoil', condition: 'NM',
+                purchasePrice, purchaseCurrency: 'USD',
+                addedAt: Date.now()
+              });
+            }
+            added++;
+          } else failed++;
+        } catch (e) { failed++; }
+        await new Promise(r => setTimeout(r, 80));
+      }
+      saveState();
+      renderFolders();
+      if (state.tab === 'collection' || state.tab === 'watch') renderCollection();
+      toast(`Imported ${added} cards${failed ? `, ${failed} not found` : ''}`);
+    }
+
+    // ---------- CSV ----------
+
+    // ---------- backup / multi-device ----------
+    function getFullBackupPayload() {
+      return {
+        version: 1,
+        app: 'CardVault',
+        exportedAt: new Date().toISOString(),
+        folders: state.folders,
+        items: state.items,
+        currency: state.currency,
+        usdCadRate: state.usdCadRate,
+        rateUpdatedAt: state.rateUpdatedAt,
+        sortMode: state.sortMode
+      };
+    }
+    function applyBackupPayload(data) {
+      if (!data || !Array.isArray(data.folders) || !Array.isArray(data.items)) {
+        throw new Error('Invalid backup file');
+      }
+      state.folders = data.folders;
+      state.items = data.items;
+      if (data.currency === 'USD' || data.currency === 'CAD') state.currency = data.currency;
+      if (data.usdCadRate) state.usdCadRate = data.usdCadRate;
+      if (data.rateUpdatedAt) state.rateUpdatedAt = data.rateUpdatedAt;
+      if (data.sortMode) state.sortMode = data.sortMode;
+      // ensure defaults
+      state.folders = state.folders.map((f, idx) => ({
+        ...f,
+        kind: f.kind === 'watch' ? 'watch' : 'collection',
+        sortOrder: f.sortOrder != null ? f.sortOrder : idx
+      }));
+      if (!state.folders.some(f => f.kind === 'collection')) {
+        state.folders.unshift({ id: crypto.randomUUID(), name: 'Main Collection', kind: 'collection', sortOrder: 0 });
+      }
+      if (!state.folders.some(f => f.kind === 'watch')) {
+        state.folders.push({ id: crypto.randomUUID(), name: 'Watch List', kind: 'watch', sortOrder: 1000 });
+      }
+      const first = state.folders.find(f => f.kind === 'collection') || state.folders[0];
+      state.activeFolderId = first.id;
+      saveState();
+      updateCurrencyButton();
+      renderFolders();
+      switchTab('collection', { keepFolder: true });
+      toast('Backup restored');
+    }
+    function exportBackup() {
+      const payload = getFullBackupPayload();
+      const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = `cardvault-backup-${new Date().toISOString().slice(0,10)}.json`;
+      a.click();
+      toast('Backup downloaded');
+    }
+    async function importBackup(event) {
+      const file = event.target.files?.[0];
+      event.target.value = '';
+      if (!file) return;
+      try {
+        const text = await file.text();
+        const data = JSON.parse(text);
+        if (!confirm('Replace ALL current CardVault data with this backup?')) return;
+        applyBackupPayload(data);
+      } catch (e) {
+        console.error(e);
+        toast('Could not read backup file');
+      }
+    }
+    async function publishCloudBackup() {
+      closeSettings();
+      toast('Uploading snapshot...');
+      try {
+        const payload = getFullBackupPayload();
+        const res = await fetch('https://jsonblob.com/api/jsonBlob', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
+          },
+          body: JSON.stringify(payload)
+        });
+        if (!res.ok) throw new Error('upload failed ' + res.status);
+        // Location header: https://jsonblob.com/api/jsonBlob/{id}
+        const loc = res.headers.get('Location') || res.headers.get('location');
+        let id = '';
+        if (loc) {
+          const parts = loc.split('/');
+          id = parts[parts.length - 1];
+        } else {
+          const body = await res.json().catch(() => null);
+          id = body?.id || '';
+        }
+        if (!id) throw new Error('No snapshot id returned');
+        const share = id;
+        try { await navigator.clipboard.writeText(share); } catch (e) {}
+        prompt('Cloud snapshot ready. Copy this code and open it on any device via Settings → Open cloud link:', share);
+        toast('Cloud code copied / shown');
+      } catch (e) {
+        console.error(e);
+        toast('Cloud upload failed — use Backup file instead');
+      }
+    }
+    async function promptCloudRestore() {
+      closeSettings();
+      const code = prompt('Paste your CardVault cloud code:');
+      if (!code) return;
+      const id = code.trim().replace(/^.*\//, '');
+      if (!id) return toast('Invalid code');
+      toast('Loading cloud snapshot...');
+      try {
+        const res = await fetch('https://jsonblob.com/api/jsonBlob/' + encodeURIComponent(id), {
+          headers: { 'Accept': 'application/json', 'Content-Type': 'application/json' }
+        });
+        if (!res.ok) throw new Error('not found');
+        const data = await res.json();
+        if (!confirm('Replace ALL current data with this cloud snapshot?')) return;
+        applyBackupPayload(data);
+      } catch (e) {
+        console.error(e);
+        toast('Could not load cloud snapshot');
+      }
+    }
+
+    function exportCSV() {
+      if (!state.items.length) return toast('Nothing to export');
+      const headers = ['Name','Set','Set Name','Collector Number','Quantity','Finish','Condition','Folder','Scryfall ID','Price USD','Price Foil','Purchase Price'];
+      const rows = state.items.map(i => {
+        const folder = state.folders.find(f => f.id === i.folderId);
+        const fin = finishFromItem(i);
+        return [
+          `"${(i.name||'').replace(/"/g,'""')}"`,
+          i.set || '',
+          `"${(i.setName||'').replace(/"/g,'""')}"`,
+          i.collectorNumber || '',
+          i.quantity,
+          fin,
+          i.condition || 'NM',
+          `"${(folder?.name||'').replace(/"/g,'""')}"`,
+          i.scryfallId || '',
+          i.price != null ? i.price : '',
+          i.priceFoil != null ? i.priceFoil : '',
+          i.purchasePrice != null ? i.purchasePrice : ''
+        ].join(',');
+      });
+      const csv = [headers.join(','), ...rows].join('\n');
+      const blob = new Blob([csv], { type: 'text/csv' });
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = `mtg-collection-${new Date().toISOString().slice(0,10)}.csv`;
+      a.click();
+      toast('CSV exported');
+    }
+    async function importCSV(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+      const text = await file.text();
+      const lines = text.split(/\r?\n/).filter(l => l.trim());
+      if (lines.length < 2) return toast('Invalid CSV');
+
+      function parseRow(row) {
+        const result = []; let cur = ''; let q = false;
+        for (let i = 0; i < row.length; i++) {
+          const ch = row[i];
+          if (ch === '"') { if (q && row[i+1] === '"') { cur += '"'; i++; } else q = !q; }
+          else if (ch === ',' && !q) { result.push(cur.trim()); cur = ''; }
+          else cur += ch;
+        }
+        result.push(cur.trim());
+        return result;
+      }
+      const headers = parseRow(lines[0]).map(h => h.toLowerCase().replace(/['"]/g, ''));
+      const nameIdx = headers.findIndex(h => h === 'name' || h === 'card name');
+      const setIdx = headers.findIndex(h => h === 'set' || h === 'set code' || h === 'edition');
+      const qtyIdx = headers.findIndex(h => h === 'quantity' || h === 'qty' || h === 'count');
+      const foilIdx = headers.findIndex(h => h === 'foil');
+      const condIdx = headers.findIndex(h => h === 'condition' || h === 'cond');
+      const folderIdx = headers.findIndex(h => h === 'folder' || h === 'binder');
+      const scryIdx = headers.findIndex(h => h.includes('scryfall'));
+      const paidIdx = headers.findIndex(h => h.includes('purchase') || h === 'paid' || h === 'price paid');
+      const priceIdx = headers.findIndex(h => h === 'price usd' || h === 'price' || h === 'market price');
+      if (nameIdx === -1) return toast('CSV needs a Name column');
+
+      let added = 0;
+      for (let i = 1; i < lines.length; i++) {
+        const cols = parseRow(lines[i]);
+        const name = cols[nameIdx];
+        if (!name) continue;
+        const set = setIdx >= 0 ? cols[setIdx] : '';
+        const quantity = qtyIdx >= 0 ? (parseInt(cols[qtyIdx]) || 1) : 1;
+        const foilRaw = foilIdx >= 0 ? (cols[foilIdx] || '').toLowerCase() : '';
+        const foil = ['yes','true','1','foil'].includes(foilRaw);
+        const condition = condIdx >= 0 ? (cols[condIdx] || 'NM') : 'NM';
+        const purchasePrice = paidIdx >= 0 && cols[paidIdx] !== '' ? parseFloat(cols[paidIdx]) : null;
+        const price = priceIdx >= 0 && cols[priceIdx] !== '' ? parseFloat(cols[priceIdx]) : null;
+        let folderId = state.activeFolderId;
+        if (folderIdx >= 0 && cols[folderIdx]) {
+          let f = state.folders.find(x => x.name.toLowerCase() === cols[folderIdx].toLowerCase());
+          if (!f) {
+            f = { id: crypto.randomUUID(), name: cols[folderIdx], sortOrder: state.folders.length };
+            state.folders.push(f);
+          }
+          folderId = f.id;
+        }
+        state.items.push({
+          id: crypto.randomUUID(),
+          scryfallId: scryIdx >= 0 ? cols[scryIdx] : `import-${i}`,
+          name, set, setName: set, collectorNumber: '',
+          image: '', price, folderId, quantity, foil,
+          finish: foil ? 'foil' : 'nonfoil', condition, purchasePrice,
+          purchaseCurrency: 'USD', addedAt: Date.now()
+        });
+        added++;
+      }
+      saveState();
+      renderFolders();
+      renderCollection();
+      toast(`Imported ${added} cards`);
+      event.target.value = '';
+    }
+
+    // ---------- init ----------
+    loadState();
+    initFirebase();
+    renderFolders();
+    renderCollection();
+    document.getElementById('collectionSubbar')?.classList.add('show');
+    document.querySelectorAll('.modal-overlay, .card-sheet-overlay').forEach(el => {
+      el.addEventListener('click', e => { if (e.target === el) el.classList.remove('open'); });
+    });
+    document.addEventListener('click', (e) => {
+      const panel = document.getElementById('sortPanel');
+      const fab = document.getElementById('sortFab');
+      if (!panel?.classList.contains('open')) return;
+      if (panel.contains(e.target) || fab?.contains(e.target)) return;
+      closeSortPanel();
+    });
+    // Daily USD→CAD rate + ManaBox-style market price refresh on open
+    updatePaidPlaceholders();
+    fetchExchangeRate().then(() => autoRefreshOnOpen());
+  </script>
+</body>
+</html>
