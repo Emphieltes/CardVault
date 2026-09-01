@@ -214,6 +214,73 @@
     }
     .home-summary-row .accent { display: none; }
     .home-summary-body { flex: 1; min-width: 0; }
+    .home-dashboard {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 12px;
+      margin-bottom: 14px;
+    }
+    .home-dashboard .home-chart-card {
+      background: transparent;
+      border: none;
+      border-radius: 0;
+      padding: 0;
+      margin-bottom: 0;
+    }
+    .home-dash-stats {
+      margin-top: 12px;
+      padding-top: 12px;
+      border-top: 1px solid var(--border);
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px 16px;
+      align-items: baseline;
+    }
+    .home-dash-stats .big {
+      font-size: 1.35rem;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+    }
+    .home-dash-stats .meta {
+      font-size: 0.82rem;
+      color: var(--text-dim);
+      font-weight: 600;
+    }
+    .home-dash-stats .gain.up { color: var(--success); font-weight: 700; font-size: 0.9rem; }
+    .home-dash-stats .gain.down { color: var(--danger); font-weight: 700; font-size: 0.9rem; }
+    .home-list-toggle-wrap {
+      display: flex;
+      justify-content: flex-start;
+      margin-bottom: 12px;
+    }
+    .home-list-toggle {
+      display: flex;
+      gap: 4px;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 3px;
+      width: fit-content;
+    }
+    .home-list-toggle button {
+      border: none;
+      background: transparent;
+      padding: 5px 12px;
+      border-radius: 16px;
+      font-size: 0.72rem;
+      font-weight: 700;
+      cursor: pointer;
+      color: var(--text-dim);
+    }
+    .home-list-toggle button.active {
+      background: var(--accent);
+      color: #fff;
+    }
+    .home-list-toggle button.active.watch-mode {
+      background: #6b7280;
+      color: #fff;
+    }
     .home-chart-card {
       background: var(--surface);
       border: 1px solid var(--border);
@@ -1576,7 +1643,8 @@ service cloud.firestore {
       rateUpdatedAt: null,
       priceHistory: [],      // [{ date: 'YYYY-MM-DD', owned: number|null, watch: number|null }] USD totals
       chartShowOwned: true,
-      chartShowWatch: true
+      chartShowWatch: true,
+      homeListKind: 'collection' // 'collection' | 'watch' on Home
     };
 
 
@@ -1977,10 +2045,19 @@ service cloud.firestore {
       state.priceHistory = hist;
       saveState();
     }
-    function buildPriceChartSvg() {
-      const showO = state.chartShowOwned !== false;
-      const showW = state.chartShowWatch !== false;
-      if (!showO && !showW) return '';
+    function buildPriceChartSvg(opts = {}) {
+      const kind = opts.kind || state.homeListKind || 'collection';
+      // Home toggle: show one series at a time (still respect settings toggles)
+      let showO = kind === 'collection' && state.chartShowOwned !== false;
+      let showW = kind === 'watch' && state.chartShowWatch !== false;
+      if (opts.showBoth) {
+        showO = state.chartShowOwned !== false;
+        showW = state.chartShowWatch !== false;
+      }
+      if (!showO && !showW) {
+        return `<div class="home-chart-card"><h3>30-day value</h3>
+          <div class="home-chart-empty">Chart disabled in Settings.</div></div>`;
+      }
       const hist = (state.priceHistory || []).slice(-30);
       if (!hist.length) {
         return `<div class="home-chart-card"><h3>30-day value</h3>
@@ -2012,6 +2089,7 @@ service cloud.firestore {
         });
         return pts.join(' ');
       }
+      const stroke = showO ? 'var(--accent)' : '#6b7280';
       const ownedPath = showO ? linePath('owned') : '';
       const watchPath = showW ? linePath('watch') : '';
       const first = hist[0]?.date || '';
@@ -2034,6 +2112,12 @@ service cloud.firestore {
         </svg>
         <div class="home-chart-legend">${legend.join('')}</div>
       </div>`;
+    }
+    function setHomeListKind(kind) {
+      if (kind !== 'collection' && kind !== 'watch') return;
+      state.homeListKind = kind;
+      try { store.setItem('cardvault_home_list', kind); } catch (e) {}
+      if (state.tab === 'home') renderHome();
     }
     function updateCurrencyButton() {
       const lab = document.getElementById('settingsCurrencyLabel');
@@ -2709,79 +2793,70 @@ service cloud.firestore {
     function renderHome() {
       const el = document.getElementById('homeContent');
       if (!el) return;
-      const owned = kindTotals('collection');
-      const watch = kindTotals('watch');
-      const ownedGain = owned.hasP && owned.hasM ? owned.market - owned.paid : null;
+      const kind = state.homeListKind === 'watch' ? 'watch' : 'collection';
+      const totals = kindTotals(kind);
+      const isWatch = kind === 'watch';
+      const gain = !isWatch && totals.hasP && totals.hasM ? totals.market - totals.paid : null;
       let gainHtml = '';
-      if (ownedGain != null) {
-        if (ownedGain > 0.005) gainHtml = `<span class="gain up">+${fmtMoney(ownedGain)}</span>`;
-        else if (ownedGain < -0.005) gainHtml = `<span class="gain down">${fmtMoney(ownedGain)}</span>`;
-        else gainHtml = `<span class="meta">±$0</span>`;
+      if (gain != null) {
+        if (gain > 0.005) gainHtml = `<span class="gain up">(+${fmtMoney(gain)})</span>`;
+        else if (gain < -0.005) gainHtml = `<span class="gain down">(${fmtMoney(gain)})</span>`;
+        else gainHtml = `<span class="meta">(±$0)</span>`;
       }
 
-      const ownedRows = foldersOfKind('collection').map(f => {
+      const folderRows = foldersOfKind(kind).map(f => {
         const t = folderTotals(f.id);
-        return `<div class="home-folder-row" role="button" tabindex="0" onclick="openFolderFromHome('${f.id}')">
+        const detail = isWatch
+          ? `${t.qty} wanted${t.hasM ? ' · ' + fmtMoney(t.market) : ''}`
+          : `${t.qty} card${t.qty === 1 ? '' : 's'}${t.hasM ? ' · ' + fmtMoney(t.market) : ''}`;
+        return `<div class="home-folder-row${isWatch ? ' watch' : ''}" role="button" tabindex="0" onclick="openFolderFromHome('${f.id}')">
           <div class="home-folder-meta">
             <div class="name">${escapeHtml(f.name)}</div>
-            <div class="detail">${t.qty} card${t.qty === 1 ? '' : 's'}${t.hasM ? ' · ' + fmtMoney(t.market) : ''}</div>
+            <div class="detail">${detail}</div>
           </div>
           <button type="button" class="folder-x" title="Delete" onclick="event.stopPropagation(); deleteFolder('${f.id}')">×</button>
           <span class="home-folder-chevron">›</span>
         </div>`;
-      }).join('') || '<div class="empty" style="padding:16px">No collection folders yet.</div>';
+      }).join('') || `<div class="empty" style="padding:16px">${isWatch ? 'No watch list folders yet.' : 'No collection folders yet.'}</div>`;
 
-      const watchRows = foldersOfKind('watch').map(f => {
-        const t = folderTotals(f.id);
-        return `<div class="home-folder-row watch" role="button" tabindex="0" onclick="openFolderFromHome('${f.id}')">
-          <div class="home-folder-meta">
-            <div class="name">${escapeHtml(f.name)}</div>
-            <div class="detail">${t.qty} wanted${t.hasM ? ' · ' + fmtMoney(t.market) : ''}</div>
-          </div>
-          <button type="button" class="folder-x" title="Delete" onclick="event.stopPropagation(); deleteFolder('${f.id}')">×</button>
-          <span class="home-folder-chevron">›</span>
-        </div>`;
-      }).join('') || '<div class="empty" style="padding:16px">No watch list folders yet.</div>';
+      const marketTxt = totals.hasM ? fmtMoney(totals.market) : '—';
+      const cardsTxt = isWatch
+        ? `${totals.qty} card${totals.qty === 1 ? '' : 's'} wanted`
+        : `${totals.qty} card${totals.qty === 1 ? '' : 's'}`;
+      let paidBlock = '';
+      if (!isWatch) {
+        paidBlock = totals.hasP
+          ? `<span class="meta">Paid ${fmtMoney(totals.paid)}</span> ${gainHtml}`
+          : `<span class="meta">Paid —</span>`;
+      }
+
+      const gameLabel = state.game === 'pokemon' ? 'Pokémon' : 'MTG';
+      const sectionTitle = isWatch ? 'Watch List' : 'My Collection';
+      const addBtn = isWatch
+        ? `<button type="button" class="folder-add-btn watch-add" onclick="openNewFolderModal('watch')">+ Watch</button>`
+        : `<button type="button" class="folder-add-btn" onclick="openNewFolderModal('collection')">+ Folder</button>`;
 
       el.innerHTML = `
-        <div class="home-summary">
-          <div class="home-summary-row owned">
-            <div class="accent"></div>
-            <div class="home-summary-body">
-              <div class="label">Collection</div>
-              <div class="home-summary-line">
-                <span class="big">${owned.hasM ? fmtMoney(owned.market) : '—'}</span>
-                <span class="meta">${owned.qty} card${owned.qty === 1 ? '' : 's'}</span>
-                ${owned.hasP ? `<span class="meta">Paid ${fmtMoney(owned.paid)}</span>` : ''}
-                ${gainHtml}
-              </div>
-            </div>
-          </div>
-          <div class="home-summary-row watch">
-            <div class="accent"></div>
-            <div class="home-summary-body">
-              <div class="label">Watch List</div>
-              <div class="home-summary-line">
-                <span class="big">${watch.hasM ? fmtMoney(watch.market) : '—'}</span>
-                <span class="meta">${watch.qty} wanted</span>
-              </div>
-            </div>
+        <div class="home-list-toggle-wrap">
+          <div class="home-list-toggle" id="homeListToggle">
+            <button type="button" class="${!isWatch ? 'active' : ''}" onclick="setHomeListKind('collection')">Collection</button>
+            <button type="button" class="${isWatch ? 'active watch-mode' : ''}" onclick="setHomeListKind('watch')">Watch List</button>
           </div>
         </div>
-        ${buildPriceChartSvg()}
-        <div class="home-section">
-          <div class="home-section-head">
-            <h2>My Collection <span style="font-weight:600;color:var(--text-dim);font-size:0.8rem">(${state.game === 'pokemon' ? 'Pokémon' : 'MTG'})</span></h2>
-            <button type="button" class="folder-add-btn" onclick="openNewFolderModal('collection')">+ Folder</button>
+        <div class="home-dashboard">
+          ${buildPriceChartSvg({ kind })}
+          <div class="home-dash-stats">
+            <span class="big">${marketTxt}</span>
+            <span class="meta">${cardsTxt}</span>
+            ${paidBlock}
           </div>
-          <div class="home-folder-list">${ownedRows}</div>
         </div>
         <div class="home-section">
           <div class="home-section-head">
-            <h2>Watch List</h2>
-            <button type="button" class="folder-add-btn watch-add" onclick="openNewFolderModal('watch')">+ Watch</button>
+            <h2>${sectionTitle} <span style="font-weight:600;color:var(--text-dim);font-size:0.8rem">(${gameLabel})</span></h2>
+            ${addBtn}
           </div>
-          <div class="home-folder-list">${watchRows}</div>
+          <div class="home-folder-list">${folderRows}</div>
         </div>
       `;
     }
