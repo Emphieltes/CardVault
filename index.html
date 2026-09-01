@@ -110,6 +110,52 @@
       background: var(--accent-soft);
     }
 
+    
+    .game-toggle {
+      display: flex;
+      gap: 4px;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 3px;
+      margin-left: 8px;
+    }
+    .game-toggle button {
+      border: none;
+      background: transparent;
+      padding: 5px 10px;
+      border-radius: 16px;
+      font-size: 0.72rem;
+      font-weight: 700;
+      cursor: pointer;
+      color: var(--text-dim);
+    }
+    .game-toggle button.active {
+      background: var(--accent);
+      color: #fff;
+    }
+    .variant-badge {
+      display: inline-block;
+      font-size: 0.62rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+      padding: 2px 6px;
+      border-radius: 6px;
+      background: #e5e7eb;
+      color: #374151;
+    }
+    .variant-badge.rh { background: #dbeafe; color: #1d4ed8; }
+    .variant-badge.holo { background: #fce7f3; color: #be185d; }
+    .variant-badge.pokeball { background: #fee2e2; color: #b91c1c; }
+    .variant-badge.masterball { background: #ede9fe; color: #6d28d9; }
+    .set-bulk-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin: 8px 0 10px;
+    }
+
     .tabs {
       display: flex; background: var(--surface); border-bottom: 1px solid var(--border);
       overflow-x: auto; -webkit-overflow-scrolling: touch;
@@ -119,6 +165,260 @@
       cursor: pointer; border-bottom: 2px solid transparent; white-space: nowrap;
     }
     .tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+
+    
+    /* ---- Home screen (ManaBox-style) ---- */
+    .home-wrap { padding: 4px 2px 24px; }
+    .home-summary {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      margin-bottom: 14px;
+      overflow: hidden;
+    }
+    .home-summary-row {
+      display: flex;
+      align-items: stretch;
+      gap: 0;
+      padding: 14px 14px 14px 14px;
+      position: relative;
+      border-left: 4px solid var(--accent);
+    }
+    .home-summary-row.owned { border-left-color: var(--accent); }
+    .home-summary-row.watch { border-left-color: #6b7280; }
+    .home-summary-row + .home-summary-row {
+      border-top: 1px solid var(--border);
+    }
+    .home-summary-row .accent { display: none; }
+    .home-summary-body { flex: 1; min-width: 0; }
+    .home-chart-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 12px 12px 8px;
+      margin-bottom: 18px;
+    }
+    .home-chart-card h3 {
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      color: var(--text-dim);
+      font-weight: 700;
+      margin: 0 0 8px;
+    }
+    .home-chart-svg {
+      width: 100%;
+      height: 140px;
+      display: block;
+    }
+    .home-chart-legend {
+      display: flex;
+      gap: 14px;
+      margin-top: 6px;
+      font-size: 0.72rem;
+      color: var(--text-dim);
+      font-weight: 600;
+    }
+    .home-chart-legend span::before {
+      content: '';
+      display: inline-block;
+      width: 10px;
+      height: 3px;
+      border-radius: 2px;
+      margin-right: 6px;
+      vertical-align: middle;
+    }
+    .home-chart-legend .leg-owned::before { background: var(--accent); }
+    .home-chart-legend .leg-watch::before { background: #6b7280; }
+    .home-chart-empty {
+      font-size: 0.8rem;
+      color: var(--text-dim);
+      padding: 20px 8px;
+      text-align: center;
+    }
+    .settings-toggle {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      padding: 10px 12px;
+      border-radius: 8px;
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: var(--text);
+    }
+    .settings-toggle input {
+      width: 18px;
+      height: 18px;
+      accent-color: var(--accent);
+    }
+    .home-summary-body .label {
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      color: var(--text-dim);
+      font-weight: 700;
+      margin-bottom: 4px;
+    }
+    .home-summary-line {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: baseline;
+      gap: 6px 14px;
+    }
+    .home-summary-line .big {
+      font-size: 1.2rem;
+      font-weight: 800;
+      font-variant-numeric: tabular-nums;
+    }
+    .home-summary-line .meta {
+      font-size: 0.82rem;
+      color: var(--text-dim);
+      font-weight: 600;
+    }
+    .home-summary-line .gain.up { color: var(--success); font-weight: 700; font-size: 0.82rem; }
+    .home-summary-line .gain.down { color: var(--danger); font-weight: 700; font-size: 0.82rem; }
+    .home-section {
+      margin-bottom: 16px;
+    }
+    .home-section-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 8px;
+      padding: 0 2px;
+    }
+    .home-section-head h2 {
+      font-size: 0.95rem;
+      font-weight: 800;
+      margin: 0;
+    }
+    .home-folder-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .home-folder-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-left: 4px solid var(--accent);
+      border-radius: 12px;
+      padding: 12px 12px 12px 12px;
+      cursor: pointer;
+      transition: box-shadow 0.15s, border-color 0.15s;
+      text-align: left;
+      width: 100%;
+      color: inherit;
+      font: inherit;
+      position: relative;
+    }
+    .home-folder-row.watch {
+      background: var(--surface);
+      border-left-color: #6b7280;
+    }
+    .home-folder-row:hover {
+      border-color: var(--accent);
+      border-left-color: var(--accent);
+      box-shadow: 0 0 0 1px var(--accent);
+    }
+    .home-folder-row.watch:hover {
+      border-color: #6b7280;
+      border-left-color: #6b7280;
+      box-shadow: 0 0 0 1px #6b7280;
+    }
+    .home-folder-meta {
+      flex: 1;
+      min-width: 0;
+    }
+    .home-folder-meta .name {
+      font-weight: 700;
+      font-size: 0.92rem;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .home-folder-meta .detail {
+      font-size: 0.75rem;
+      color: var(--text-dim);
+      margin-top: 2px;
+    }
+    .home-folder-chevron {
+      color: var(--text-dim);
+      font-size: 1.1rem;
+      flex-shrink: 0;
+      padding-right: 4px;
+    }
+    /* Folder detail value strip — single bar, not 4 boxes */
+    .value-bar {
+      display: none;
+      grid-template-columns: 1fr;
+      gap: 0;
+      margin: 8px 0 14px;
+      padding: 0;
+      background: transparent;
+      border: none;
+    }
+    .value-bar.show { display: block; }
+    .value-strip {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 12px 14px;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: baseline;
+      gap: 6px 16px;
+    }
+    .value-strip .vs-main {
+      font-size: 1.15rem;
+      font-weight: 800;
+      font-variant-numeric: tabular-nums;
+    }
+    .value-strip .vs-meta {
+      font-size: 0.82rem;
+      color: var(--text-dim);
+      font-weight: 600;
+    }
+    .value-strip .vs-gain.up { color: var(--success); font-weight: 700; font-size: 0.85rem; }
+    .value-strip .vs-gain.down { color: var(--danger); font-weight: 700; font-size: 0.85rem; }
+
+    .folder-view-bar {
+      display: none;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 10px 4px;
+      max-width: 1280px;
+      margin: 0 auto;
+    }
+    .folder-view-bar.show { display: flex; }
+    .folder-view-bar .back-btn {
+      border: 1px solid var(--border);
+      background: var(--surface);
+      border-radius: 20px;
+      padding: 6px 12px;
+      font-weight: 700;
+      font-size: 0.8rem;
+      cursor: pointer;
+      color: var(--text);
+    }
+    .folder-view-bar .back-btn:hover {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 1px var(--accent);
+    }
+    .folder-view-bar .folder-title {
+      font-weight: 800;
+      font-size: 0.95rem;
+      flex: 1;
+      min-width: 0;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    /* Hide horizontal folder chips on home; show only when in folder view or sets/search */
+    .folders-bar.home-hidden { display: none; }
 
     .folders-bar {
       background: var(--surface); border-bottom: 1px solid var(--border);
@@ -309,62 +609,8 @@
       font-weight: 600;
     }
 
-    /* Value summary — card-style metrics */
-    .value-bar {
-      display: none;
-      grid-template-columns: repeat(4, minmax(0, 1fr));
-      gap: 8px;
-      margin: 8px 0 14px;
-      padding: 0;
-      background: transparent;
-      border: none;
-    }
-    .value-bar.show { display: grid; }
-    .value-stat {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      padding: 10px 12px;
-      display: flex;
-      flex-direction: column;
-      gap: 4px;
-      min-width: 0;
-      position: relative;
-      overflow: hidden;
-    }
-    .value-stat::before {
-      content: '';
-      position: absolute;
-      left: 0; top: 0; bottom: 0;
-      width: 3px;
-      background: var(--border);
-    }
-    .value-stat.paid::before { background: var(--text-dim); }
-    .value-stat.market::before { background: var(--accent); }
-    .value-stat.gain.up::before { background: var(--success); }
-    .value-stat.gain.down::before { background: var(--danger); }
-    .value-stat.cards::before { background: #94a3b8; }
-    .value-label {
-      font-size: 0.65rem;
-      color: var(--text-dim);
-      text-transform: uppercase;
-      letter-spacing: 0.04em;
-      font-weight: 600;
-    }
-    .value-num {
-      font-size: 1.05rem;
-      font-weight: 750;
-      font-variant-numeric: tabular-nums;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-    .value-num.up { color: var(--success); }
-    .value-num.down { color: var(--danger); }
-    .value-num.muted { color: var(--text-dim); font-weight: 650; }
-    @media (max-width: 520px) {
-      .value-bar { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-    }
+    /* value-bar styles moved to home section (single strip) */
+
 
     /* Floating sort control */
     .sort-fab {
@@ -909,6 +1155,10 @@
 <body>
   <header>
     <h1 class="app-brand"><img class="app-logo" src="data:image/png;base64,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" alt="" width="36" height="36" /><span>CardVault</span></h1>
+    <div class="game-toggle" id="gameToggle">
+      <button type="button" class="active" data-game="mtg" onclick="setGame('mtg')">MTG</button>
+      <button type="button" data-game="pokemon" onclick="setGame('pokemon')">Pokémon</button>
+    </div>
     <button type="button" class="btn-login" id="headerLoginBtn" onclick="onHeaderLoginClick()">Log in</button>
     <button class="btn btn-secondary btn-icon" id="settingsBtn" onclick="toggleSettings()" title="Settings" aria-label="Settings">
       <span class="cog">⚙</span>
@@ -921,9 +1171,17 @@
     <h3>Settings</h3>
     <p class="auth-status" id="authStatus"><span class="sync-dot" id="syncDot"></span>Not signed in</p>
     <div class="settings-item" onclick="toggleCurrency()">Currency: <strong id="settingsCurrencyLabel">CAD</strong></div>
+    <div class="settings-toggle" onclick="event.stopPropagation()">
+      <span>Collection chart</span>
+      <input type="checkbox" id="toggleChartOwned" checked onchange="toggleChartPref('owned', this.checked)" />
+    </div>
+    <div class="settings-toggle" onclick="event.stopPropagation()">
+      <span>Watch list chart</span>
+      <input type="checkbox" id="toggleChartWatch" checked onchange="toggleChartPref('watch', this.checked)" />
+    </div>
     <div class="settings-item" onclick="document.getElementById('csvInput').click(); closeSettings();">Import CSV</div>
     <div class="settings-item" onclick="exportCSV(); closeSettings();">Export CSV</div>
-    <p class="settings-note">Sign in with the Log in button (top right). Your list syncs to the cloud automatically while signed in.</p>
+    <p class="settings-note">Price chart builds daily snapshots when you open CardVault (up to 30 days). Sign in to sync across devices.</p>
     <button type="button" class="settings-signout" id="settingsSignOutBtn" onclick="cloudSignOut()" disabled>Sign out</button>
   </aside>
 
@@ -986,20 +1244,29 @@ service cloud.firestore {
   </div>
 
   <div class="tabs">
-    <div class="tab active" data-tab="collection" onclick="switchTab('collection')">Collection</div>
-    <div class="tab" data-tab="watch" onclick="switchTab('watch')">Watch List</div>
+    <div class="tab active" data-tab="home" onclick="switchTab('home')">Home</div>
     <div class="tab" data-tab="sets" onclick="switchTab('sets')">Browse Sets</div>
     <div class="tab" data-tab="search" onclick="switchTab('search')">Search</div>
   </div>
 
   <div class="folders-bar" id="foldersBar"></div>
+  <div class="folder-view-bar" id="folderViewBar">
+    <button type="button" class="back-btn" onclick="goHome()">← Home</button>
+    <span class="folder-title" id="folderViewTitle">Folder</span>
+    <button type="button" class="btn btn-secondary btn-sm" onclick="refreshFolderPrices()">↻ Prices</button>
+  </div>
   <div class="collection-subbar" id="collectionSubbar">
     <button class="btn btn-secondary btn-sm" onclick="refreshFolderPrices()">↻ Refresh Prices</button>
   </div>
 
   <main>
-    <!-- COLLECTION TAB -->
-    <div id="panel-collection">
+    <!-- HOME TAB -->
+    <div id="panel-home">
+      <div id="homeContent" class="home-wrap"></div>
+    </div>
+
+    <!-- FOLDER DETAIL (collection / watch folder) -->
+    <div id="panel-collection" style="display:none">
       <div id="valueBar" class="value-bar"></div>
       <div id="collectionContent"></div>
     </div>
@@ -1028,6 +1295,10 @@ service cloud.firestore {
         <div class="toolbar">
           <button class="btn btn-secondary btn-sm" onclick="backToSetList()">← All Sets</button>
           <span id="currentSetName" style="font-weight:600; flex:1"></span>
+        </div>
+        <div class="set-bulk-actions" id="setAlwaysActions">
+          <button type="button" class="btn btn-secondary btn-sm" onclick="selectAllInSet()">Select all printings</button>
+          <button type="button" class="btn btn-sm" onclick="selectAllInSet(); bulkAddSelected();">Add all printings…</button>
         </div>
         <div class="bulk-bar" id="setBulkBar">
           <span id="setSelectedCount">0 selected</span>
@@ -1214,7 +1485,8 @@ service cloud.firestore {
       folders: [],
       items: [],
       activeFolderId: null,
-      tab: 'collection',
+      tab: 'home',
+      game: 'mtg', // 'mtg' | 'pokemon'
       sets: [],
       currentSetCode: null,
       currentSetCards: [],
@@ -1228,7 +1500,10 @@ service cloud.firestore {
       sortMode: 'number-asc',
       currency: 'CAD',       // display currency: 'USD' | 'CAD'
       usdCadRate: 1.39,      // fallback until live rate loads
-      rateUpdatedAt: null
+      rateUpdatedAt: null,
+      priceHistory: [],      // [{ date: 'YYYY-MM-DD', owned: number|null, watch: number|null }] USD totals
+      chartShowOwned: true,
+      chartShowWatch: true
     };
 
 
@@ -1404,9 +1679,16 @@ service cloud.firestore {
 
     async function submitAuth() {
       const err = document.getElementById('authError');
+      const btn = document.getElementById('authSubmitBtn');
       err.textContent = '';
       if (!cloudReady && !initFirebase()) {
         err.textContent = 'Cloud not configured';
+        return;
+      }
+      // file:// on phones often blocks Firebase Auth with no obvious error
+      if (location.protocol === 'file:') {
+        err.textContent = 'Login does not work from a downloaded file on most phones. Host CardVault on a free https link (see instructions) and open that instead.';
+        toast('Open via https link, not the downloaded file');
         return;
       }
       const email = document.getElementById('authEmail').value.trim();
@@ -1415,10 +1697,11 @@ service cloud.firestore {
         err.textContent = 'Enter email and a password (6+ characters)';
         return;
       }
+      const prev = btn ? btn.textContent : '';
+      if (btn) { btn.disabled = true; btn.textContent = 'Please wait…'; }
       try {
         if (authMode === 'signup') {
           await fbAuth.createUserWithEmailAndPassword(email, password);
-          // Push local data up for new accounts
           await pushCloudState(true);
         } else {
           await fbAuth.signInWithEmailAndPassword(email, password);
@@ -1434,9 +1717,15 @@ service cloud.firestore {
           'auth/wrong-password': 'Wrong password',
           'auth/invalid-credential': 'Wrong email or password',
           'auth/weak-password': 'Password too weak (use 6+ characters)',
-          'auth/network-request-failed': 'Network error — check connection'
+          'auth/network-request-failed': 'Network error — check connection',
+          'auth/unauthorized-domain': 'This website is not authorized in Firebase. Add its domain under Authentication → Settings → Authorized domains.',
+          'auth/operation-not-allowed': 'Email/Password sign-in is not enabled in Firebase Authentication.'
         };
-        err.textContent = map[e.code] || e.message || 'Auth failed';
+        const msg = map[e.code] || e.message || 'Auth failed';
+        err.textContent = msg;
+        toast(msg);
+      } finally {
+        if (btn) { btn.disabled = false; btn.textContent = prev || (authMode === 'login' ? 'Log in' : 'Create account'); }
       }
     }
 
@@ -1520,8 +1809,8 @@ service cloud.firestore {
           state.folders = p.folders || [];
           state.items = (p.items || []).map(i => ({
             ...i,
+            game: i.game === 'pokemon' ? 'pokemon' : 'mtg',
             purchasePrice: i.purchasePrice != null ? i.purchasePrice : null,
-            // purchase prices are stored in USD for consistent conversion
             purchaseCurrency: i.purchaseCurrency || 'USD',
             price: i.price != null ? i.price : null,
             priceFoil: i.priceFoil != null ? i.priceFoil : null,
@@ -1531,12 +1820,14 @@ service cloud.firestore {
           if (p.currency === 'USD' || p.currency === 'CAD') state.currency = p.currency;
           if (p.usdCadRate) state.usdCadRate = p.usdCadRate;
           if (p.rateUpdatedAt) state.rateUpdatedAt = p.rateUpdatedAt;
+          if (Array.isArray(p.priceHistory)) state.priceHistory = p.priceHistory;
         }
       } catch (e) {}
       // Migrate folder kinds
       state.folders = (state.folders || []).map((f, idx) => ({
         ...f,
         kind: f.kind === 'watch' ? 'watch' : 'collection',
+        game: f.game === 'pokemon' ? 'pokemon' : 'mtg',
         sortOrder: f.sortOrder != null ? f.sortOrder : idx
       }));
       if (!state.folders.some(f => f.kind === 'collection')) {
@@ -1553,9 +1844,12 @@ service cloud.firestore {
         if (prefs.currency === 'USD' || prefs.currency === 'CAD') state.currency = prefs.currency;
         if (prefs.usdCadRate) state.usdCadRate = prefs.usdCadRate;
         if (prefs.rateUpdatedAt) state.rateUpdatedAt = prefs.rateUpdatedAt;
+        if (typeof prefs.chartShowOwned === 'boolean') state.chartShowOwned = prefs.chartShowOwned;
+        if (typeof prefs.chartShowWatch === 'boolean') state.chartShowWatch = prefs.chartShowWatch;
       } catch (e) {}
       saveState();
       updateCurrencyButton();
+      updateChartToggles();
     }
     function saveState() {
       store.setItem(STORAGE_KEY, JSON.stringify({
@@ -1563,14 +1857,110 @@ service cloud.firestore {
         items: state.items,
         currency: state.currency,
         usdCadRate: state.usdCadRate,
-        rateUpdatedAt: state.rateUpdatedAt
+        rateUpdatedAt: state.rateUpdatedAt,
+        priceHistory: state.priceHistory || []
       }));
       store.setItem('mtg_tracker_prefs', JSON.stringify({
         currency: state.currency,
         usdCadRate: state.usdCadRate,
-        rateUpdatedAt: state.rateUpdatedAt
+        rateUpdatedAt: state.rateUpdatedAt,
+        chartShowOwned: state.chartShowOwned !== false,
+        chartShowWatch: state.chartShowWatch !== false
       }));
       scheduleCloudPush();
+    }
+    function updateChartToggles() {
+      const o = document.getElementById('toggleChartOwned');
+      const w = document.getElementById('toggleChartWatch');
+      if (o) o.checked = state.chartShowOwned !== false;
+      if (w) w.checked = state.chartShowWatch !== false;
+    }
+    function toggleChartPref(which, on) {
+      if (which === 'owned') state.chartShowOwned = !!on;
+      if (which === 'watch') state.chartShowWatch = !!on;
+      saveState();
+      if (state.tab === 'home') renderHome();
+    }
+    function todayKey() {
+      const d = new Date();
+      return d.toISOString().slice(0, 10);
+    }
+    function recordPriceSnapshot() {
+      const owned = kindTotals('collection');
+      const watch = kindTotals('watch');
+      const date = todayKey();
+      const point = {
+        date,
+        owned: owned.hasM ? owned.market : null,
+        watch: watch.hasM ? watch.market : null
+      };
+      let hist = Array.isArray(state.priceHistory) ? state.priceHistory.slice() : [];
+      const idx = hist.findIndex(h => h.date === date);
+      if (idx >= 0) hist[idx] = point;
+      else hist.push(point);
+      hist.sort((a, b) => a.date.localeCompare(b.date));
+      // keep 30 days
+      if (hist.length > 30) hist = hist.slice(hist.length - 30);
+      state.priceHistory = hist;
+      saveState();
+    }
+    function buildPriceChartSvg() {
+      const showO = state.chartShowOwned !== false;
+      const showW = state.chartShowWatch !== false;
+      if (!showO && !showW) return '';
+      const hist = (state.priceHistory || []).slice(-30);
+      if (!hist.length) {
+        return `<div class="home-chart-card"><h3>30-day value</h3>
+          <div class="home-chart-empty">Chart will fill in as prices refresh each day (up to 30 days).</div></div>`;
+      }
+      const w = 320, h = 140, padL = 8, padR = 8, padT = 12, padB = 22;
+      const vals = [];
+      hist.forEach(p => {
+        if (showO && p.owned != null) vals.push(p.owned);
+        if (showW && p.watch != null) vals.push(p.watch);
+      });
+      if (!vals.length) {
+        return `<div class="home-chart-card"><h3>30-day value</h3>
+          <div class="home-chart-empty">No priced cards yet to chart.</div></div>`;
+      }
+      let minV = Math.min(...vals);
+      let maxV = Math.max(...vals);
+      if (maxV === minV) { minV = minV * 0.95; maxV = maxV * 1.05 || 1; }
+      const span = maxV - minV || 1;
+      const n = Math.max(hist.length, 2);
+      const xAt = (i) => padL + (i / (n - 1)) * (w - padL - padR);
+      const yAt = (v) => padT + (1 - (v - minV) / span) * (h - padT - padB);
+      function linePath(key) {
+        const pts = [];
+        hist.forEach((p, i) => {
+          const v = p[key];
+          if (v == null) return;
+          pts.push(`${pts.length ? 'L' : 'M'}${xAt(i).toFixed(1)},${yAt(v).toFixed(1)}`);
+        });
+        return pts.join(' ');
+      }
+      const ownedPath = showO ? linePath('owned') : '';
+      const watchPath = showW ? linePath('watch') : '';
+      const first = hist[0]?.date || '';
+      const last = hist[hist.length - 1]?.date || '';
+      const fmtD = (s) => {
+        if (!s) return '';
+        const [, m, d] = s.split('-');
+        return `${Number(m)}/${Number(d)}`;
+      };
+      const legend = [];
+      if (showO) legend.push('<span class="leg-owned">Collection</span>');
+      if (showW) legend.push('<span class="leg-watch">Watch list</span>');
+      return `<div class="home-chart-card">
+        <h3>30-day value</h3>
+        <svg class="home-chart-svg" viewBox="0 0 ${w} ${h}" preserveAspectRatio="none">
+          ${ownedPath ? `<path d="${ownedPath}" fill="none" stroke="var(--accent)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>` : ''}
+          ${watchPath ? `<path d="${watchPath}" fill="none" stroke="#6b7280" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>` : ''}
+          <text x="${padL}" y="${h - 6}" font-size="9" fill="#94a3b8">${fmtD(first)}</text>
+          <text x="${w - padR}" y="${h - 6}" font-size="9" fill="#94a3b8" text-anchor="end">${fmtD(last)}</text>
+        </svg>
+        <div class="home-chart-legend">${legend.join('')}</div>
+      </div>`;
     }
     function updateCurrencyButton() {
       const lab = document.getElementById('settingsCurrencyLabel');
@@ -1690,10 +2080,13 @@ service cloud.firestore {
     }
     /** Pick market price for a given finish */
     function priceForFinish(cardOrItem, finish) {
+      // Pokémon printings store market on .price for that specific variant
+      if ((cardOrItem.game || '') === 'pokemon') {
+        return cardOrItem.price != null ? cardOrItem.price : null;
+      }
       const f = finish || 'nonfoil';
       if (f === 'foil' || f === 'surge') {
         if (cardOrItem.priceFoil != null) return cardOrItem.priceFoil;
-        // fallback if only one price stored on item
         return cardOrItem.price != null ? cardOrItem.price : null;
       }
       return cardOrItem.price != null ? cardOrItem.price : null;
@@ -1713,8 +2106,9 @@ service cloud.firestore {
     function folderById(id) {
       return state.folders.find(f => f.id === id);
     }
-    function foldersOfKind(kind) {
+    function foldersOfKind(kind, anyGame) {
       return state.folders.filter(f => folderKind(f) === kind)
+        .filter(f => anyGame ? true : folderGame(f) === (state.game || 'mtg'))
         .sort((a, b) => (a.sortOrder || 0) - (b.sortOrder || 0));
     }
     function isWatchFolder(folderId) {
@@ -1769,34 +2163,554 @@ service cloud.firestore {
       `).join('');
     }
 
+
+    // ---------- Pokémon (TCGdex) ----------
+    // Each physical printing is its own collectible (master-set friendly):
+    //   id: "sv08.5-001::reverse::pokeball"
+    const PKMN_API = 'https://api.tcgdex.net/v2/en';
+    // Offline/cors fallback when live TCGdex fetch fails in the browser
+    const PKMN_SETS_FALLBACK = [{"code":"me05","name":"Pitch Black","card_count":120,"released_at":""},{"code":"me04","name":"Chaos Rising","card_count":122,"released_at":""},{"code":"me03","name":"Perfect Order","card_count":124,"released_at":""},{"code":"B2a","name":"Paldean Wonders","card_count":131,"released_at":""},{"code":"me02.5","name":"Ascended Heroes","card_count":295,"released_at":""},{"code":"B2","name":"Fantastical Parade","card_count":234,"released_at":""},{"code":"B1a","name":"Crimson Blaze","card_count":103,"released_at":""},{"code":"me02","name":"Phantasmal Flames","card_count":130,"released_at":""},{"code":"B1","name":"Mega Rising","card_count":331,"released_at":""},{"code":"mep","name":"MEP Black Star Promos","card_count":89,"released_at":""},{"code":"me01","name":"Mega Evolution","card_count":188,"released_at":""},{"code":"mee","name":"Mega Evolution Energy","card_count":8,"released_at":""},{"code":"A4a","name":"Secluded Springs","card_count":105,"released_at":""},{"code":"A4","name":"Wisdom of Sea and Sky","card_count":241,"released_at":""},{"code":"sv10.5b","name":"Black Bolt","card_count":172,"released_at":""},{"code":"sv10.5w","name":"White Flare","card_count":173,"released_at":""},{"code":"A3b","name":"Eevee Grove","card_count":107,"released_at":""},{"code":"sv10","name":"Destined Rivals","card_count":244,"released_at":""},{"code":"A3a","name":"Extradimensional Crisis","card_count":103,"released_at":""},{"code":"A3","name":"Celestial Guardians","card_count":239,"released_at":""},{"code":"sv09","name":"Journey Together","card_count":190,"released_at":""},{"code":"A2b","name":"Shining Revelry","card_count":111,"released_at":""},{"code":"A2a","name":"Triumphant Light","card_count":96,"released_at":""},{"code":"A2","name":"Space-Time Smackdown","card_count":207,"released_at":""},{"code":"sv08.5","name":"Prismatic Evolutions","card_count":180,"released_at":""},{"code":"A1a","name":"Mythical Island","card_count":86,"released_at":""},{"code":"2024sv","name":"McDonald's Collection 2024","card_count":15,"released_at":""},{"code":"sv08","name":"Surging Sparks","card_count":252,"released_at":""},{"code":"P-A","name":"Promos-A","card_count":100,"released_at":""},{"code":"A1","name":"Genetic Apex","card_count":286,"released_at":""},{"code":"sv07","name":"Stellar Crown","card_count":175,"released_at":""},{"code":"sv06.5","name":"Shrouded Fable","card_count":99,"released_at":""},{"code":"sv06","name":"Twilight Masquerade","card_count":226,"released_at":""},{"code":"sv05","name":"Temporal Forces","card_count":218,"released_at":""},{"code":"sv04.5","name":"Paldean Fates","card_count":245,"released_at":""},{"code":"sv04","name":"Paradox Rift","card_count":266,"released_at":""},{"code":"mfb","name":"My First Battle","card_count":48,"released_at":""},{"code":"sv03.5","name":"151","card_count":207,"released_at":""},{"code":"sv03","name":"Obsidian Flames","card_count":230,"released_at":""},{"code":"2023sv","name":"McDonald's Collection 2023","card_count":15,"released_at":""},{"code":"sv02","name":"Paldea Evolved","card_count":279,"released_at":""},{"code":"sve","name":"Scarlet & Violet Energy","card_count":24,"released_at":""},{"code":"svp","name":"SVP Black Star Promos","card_count":226,"released_at":""},{"code":"sv01","name":"Scarlet & Violet","card_count":258,"released_at":""},{"code":"swsh12.5","name":"Crown Zenith","card_count":160,"released_at":""},{"code":"swsh12.5gg","name":"Crown Zenith Galarian Gallery","card_count":70,"released_at":""},{"code":"swsh12tg","name":"Silver Tempest Trainer Gallery","card_count":30,"released_at":""},{"code":"swsh12","name":"Silver Tempest","card_count":215,"released_at":""},{"code":"swsh11tg","name":"Lost Origin Trainer Gallery","card_count":30,"released_at":""},{"code":"swsh11","name":"Lost Origin","card_count":217,"released_at":""},{"code":"2022swsh","name":"McDonald's Collection 2022","card_count":15,"released_at":""},{"code":"swsh10.5","name":"Pok\u00e9mon GO","card_count":88,"released_at":""},{"code":"swsh10tg","name":"Astral Radiance Trainer Gallery","card_count":30,"released_at":""},{"code":"swsh10","name":"Astral Radiance","card_count":216,"released_at":""},{"code":"swsh9tg","name":"Brilliant Stars Trainer Gallery","card_count":30,"released_at":""},{"code":"swsh9","name":"Brilliant Stars","card_count":186,"released_at":""},{"code":"swsh8","name":"Fusion Strike","card_count":284,"released_at":""},{"code":"cel25cc","name":"Celebrations Classic Collection","card_count":25,"released_at":""},{"code":"cel25","name":"Celebrations","card_count":25,"released_at":""},{"code":"swsh7","name":"Evolving Skies","card_count":237,"released_at":""},{"code":"swsh6","name":"Chilling Reign","card_count":233,"released_at":""},{"code":"swsh5","name":"Battle Styles","card_count":183,"released_at":""},{"code":"swsh4.5sv","name":"Shining Fates Shiny Vault","card_count":122,"released_at":""},{"code":"swsh4.5","name":"Shining Fates","card_count":73,"released_at":""},{"code":"2021swsh","name":"McDonald's Collection 2021","card_count":25,"released_at":""},{"code":"swsh4","name":"Vivid Voltage","card_count":203,"released_at":""},{"code":"swsh3.5","name":"Champion's Path","card_count":80,"released_at":""},{"code":"fut2020","name":"Pok\u00e9mon Futsal 2020","card_count":5,"released_at":""},{"code":"swsh3","name":"Darkness Ablaze","card_count":201,"released_at":""},{"code":"swsh2","name":"Rebel Clash","card_count":209,"released_at":""},{"code":"swsh1","name":"Sword & Shield","card_count":216,"released_at":""},{"code":"swshp","name":"SWSH Black Star Promos","card_count":307,"released_at":""},{"code":"sm12","name":"Cosmic Eclipse","card_count":271,"released_at":""},{"code":"2019sm","name":"McDonald's Collection 2019","card_count":12,"released_at":""},{"code":"sm115","name":"Hidden Fates","card_count":69,"released_at":""},{"code":"sma","name":"Hidden Fates Shiny Vault","card_count":94,"released_at":""},{"code":"sm11","name":"Unified Minds","card_count":258,"released_at":""},{"code":"sm10","name":"Unbroken Bonds","card_count":234,"released_at":""},{"code":"det1","name":"Detective Pikachu","card_count":18,"released_at":""},{"code":"sm9","name":"Team Up","card_count":196,"released_at":""},{"code":"sm8","name":"Lost Thunder","card_count":236,"released_at":""},{"code":"2018sm","name":"McDonald's Collection 2018","card_count":12,"released_at":""},{"code":"sm7.5","name":"Dragon Majesty","card_count":78,"released_at":""},{"code":"sm7","name":"Celestial Storm","card_count":183,"released_at":""},{"code":"sm6","name":"Forbidden Light","card_count":146,"released_at":""},{"code":"sm5","name":"Ultra Prism","card_count":173,"released_at":""},{"code":"sm4","name":"Crimson Invasion","card_count":125,"released_at":""},{"code":"sm3.5","name":"Shining Legends","card_count":78,"released_at":""},{"code":"sm3","name":"Burning Shadows","card_count":169,"released_at":""},{"code":"2017sm","name":"McDonald's Collection 2017","card_count":12,"released_at":""},{"code":"sm2","name":"Guardians Rising","card_count":169,"released_at":""},{"code":"tk-sm-r","name":"SM trainer Kit (Alolan Raichu)","card_count":30,"released_at":""},{"code":"tk-sm-l","name":"SM trainer Kit (Lycanroc)","card_count":30,"released_at":""},{"code":"sm1","name":"Sun & Moon","card_count":172,"released_at":""},{"code":"smp","name":"SM Black Star Promos","card_count":248,"released_at":""},{"code":"xy12","name":"Evolutions","card_count":113,"released_at":""},{"code":"2016xy","name":"McDonald's Collection 2016","card_count":12,"released_at":""},{"code":"xy11","name":"Steam Siege","card_count":116,"released_at":""},{"code":"xy10","name":"Fates Collide","card_count":129,"released_at":""},{"code":"tk-xy-p","name":"XY trainer Kit (Pikachu Libre)","card_count":30,"released_at":""},{"code":"tk-xy-su","name":"XY trainer Kit (Suicune)","card_count":30,"released_at":""},{"code":"g1","name":"Generations","card_count":117,"released_at":""},{"code":"xy9","name":"BREAKpoint","card_count":126,"released_at":""},{"code":"2015xy","name":"McDonald's Collection 2015","card_count":12,"released_at":""},{"code":"xy8","name":"BREAKthrough","card_count":165,"released_at":""},{"code":"xy7","name":"Ancient Origins","card_count":101,"released_at":""},{"code":"xy6","name":"Roaring Skies","card_count":112,"released_at":""},{"code":"tk-xy-latio","name":"XY trainer Kit (Latios)","card_count":30,"released_at":""},{"code":"tk-xy-latia","name":"XY trainer Kit (Latias)","card_count":30,"released_at":""},{"code":"dc1","name":"Double Crisis","card_count":34,"released_at":""},{"code":"xy5","name":"Primal Clash","card_count":164,"released_at":""},{"code":"xy4","name":"Phantom Forces","card_count":124,"released_at":""},{"code":"tk-xy-b","name":"XY trainer Kit (Bisharp)","card_count":30,"released_at":""},{"code":"tk-xy-w","name":"XY trainer Kit (Wigglytuff)","card_count":30,"released_at":""},{"code":"xy3","name":"Furious Fists","card_count":114,"released_at":""},{"code":"2014xy","name":"McDonald's Collection 2014","card_count":12,"released_at":""},{"code":"xy2","name":"Flashfire","card_count":110,"released_at":""},{"code":"tk-xy-n","name":"XY trainer Kit (Noivern)","card_count":30,"released_at":""},{"code":"tk-xy-sy","name":"XY trainer Kit (Sylveon)","card_count":30,"released_at":""},{"code":"xya","name":"Yellow A Alternate","card_count":6,"released_at":""},{"code":"xy1","name":"XY","card_count":146,"released_at":""},{"code":"xy0","name":"Kalos Starter Set","card_count":39,"released_at":""},{"code":"rc","name":"Radiant Collection","card_count":25,"released_at":""},{"code":"bw11","name":"Legendary Treasures","card_count":140,"released_at":""},{"code":"xyp","name":"XY Black Star Promos","card_count":216,"released_at":""},{"code":"bw10","name":"Plasma Blast","card_count":105,"released_at":""},{"code":"bw9","name":"Plasma Freeze","card_count":122,"released_at":""},{"code":"bw8","name":"Plasma Storm","card_count":138,"released_at":""},{"code":"bw7","name":"Boundaries Crossed","card_count":153,"released_at":""},{"code":"dv1","name":"Dragon Vault","card_count":21,"released_at":""},{"code":"bw6","name":"Dragons Exalted","card_count":128,"released_at":""},{"code":"2012bw","name":"McDonald's Collection 2012","card_count":12,"released_at":""},{"code":"bw5","name":"Dark Explorers","card_count":111,"released_at":""},{"code":"bw4","name":"Next Destinies","card_count":103,"released_at":""},{"code":"bw3","name":"Noble Victories","card_count":102,"released_at":""},{"code":"tk-bw-z","name":"BW trainer Kit (Zoroark)","card_count":30,"released_at":""},{"code":"tk-bw-e","name":"BW trainer Kit (Excadrill)","card_count":30,"released_at":""},{"code":"bw2","name":"Emerging Powers","card_count":98,"released_at":""},{"code":"2011bw","name":"McDonald's Collection 2011","card_count":12,"released_at":""},{"code":"bwp","name":"BW Black Star Promos","card_count":101,"released_at":""},{"code":"bw1","name":"Black & White","card_count":115,"released_at":""},{"code":"col1","name":"Call of Legends","card_count":106,"released_at":""},{"code":"hgss4","name":"Triumphant","card_count":103,"released_at":""},{"code":"hgss3","name":"Undaunted","card_count":91,"released_at":""},{"code":"hgss2","name":"Unleashed","card_count":96,"released_at":""},{"code":"tk-hs-g","name":"HS trainer Kit (Gyarados)","card_count":30,"released_at":""},{"code":"tk-hs-r","name":"HS trainer Kit (Raichu)","card_count":30,"released_at":""},{"code":"hgssp","name":"HGSS Black Star Promos","card_count":25,"released_at":""},{"code":"hgss1","name":"HeartGold SoulSilver","card_count":124,"released_at":""},{"code":"ru1","name":"Pok\u00e9mon Rumble","card_count":16,"released_at":""},{"code":"pl4","name":"Arceus","card_count":111,"released_at":""},{"code":"pl3","name":"Supreme Victors","card_count":153,"released_at":""},{"code":"pl2","name":"Rising Rivals","card_count":120,"released_at":""},{"code":"pop9","name":"POP Series 9","card_count":17,"released_at":""},{"code":"pl1","name":"Platinum","card_count":133,"released_at":""},{"code":"dp7","name":"Stormfront","card_count":106,"released_at":""},{"code":"pop8","name":"POP Series 8","card_count":17,"released_at":""},{"code":"dp6","name":"Legends Awakened","card_count":146,"released_at":""},{"code":"dp5","name":"Majestic Dawn","card_count":100,"released_at":""},{"code":"pop7","name":"POP Series 7","card_count":17,"released_at":""},{"code":"dp4","name":"Great Encounters","card_count":106,"released_at":""},{"code":"dp3","name":"Secret Wonders","card_count":132,"released_at":""},{"code":"pop6","name":"POP Series 6","card_count":17,"released_at":""},{"code":"tk-dp-m","name":"DP trainer Kit (Manaphy)","card_count":12,"released_at":""},{"code":"tk-dp-l","name":"DP trainer Kit (Lucario)","card_count":11,"released_at":""},{"code":"dp2","name":"Mysterious Treasures","card_count":124,"released_at":""},{"code":"dp1","name":"Diamond & Pearl","card_count":130,"released_at":""},{"code":"dpp","name":"DP Black Star Promos","card_count":56,"released_at":""},{"code":"pop5","name":"POP Series 5","card_count":17,"released_at":""},{"code":"ex16","name":"Power Keepers","card_count":108,"released_at":""},{"code":"ex15","name":"Dragon Frontiers","card_count":101,"released_at":""},{"code":"ex14","name":"Crystal Guardians","card_count":100,"released_at":""},{"code":"pop4","name":"POP Series 4","card_count":17,"released_at":""},{"code":"ex13","name":"Holon Phantoms","card_count":111,"released_at":""},{"code":"pop3","name":"POP Series 3","card_count":17,"released_at":""},{"code":"tk-ex-p","name":"EX trainer Kit 2 (Plusle)","card_count":12,"released_at":""},{"code":"tk-ex-m","name":"EX trainer Kit 2 (Minun)","card_count":12,"released_at":""},{"code":"ex12","name":"Legend Maker","card_count":93,"released_at":""},{"code":"ex11","name":"Delta Species","card_count":114,"released_at":""},{"code":"exu","name":"Unseen Forces Unown Collection","card_count":28,"released_at":""},{"code":"ex10","name":"Unseen Forces","card_count":117,"released_at":""},{"code":"pop2","name":"POP Series 2","card_count":17,"released_at":""},{"code":"ex9","name":"Emerald","card_count":107,"released_at":""},{"code":"ex8","name":"Deoxys","card_count":108,"released_at":""},{"code":"ex7","name":"Team Rocket Returns","card_count":111,"released_at":""},{"code":"pop1","name":"POP Series 1","card_count":17,"released_at":""},{"code":"ex6","name":"FireRed & LeafGreen","card_count":116,"released_at":""},{"code":"tk-ex-latio","name":"EX trainer Kit (Latios)","card_count":10,"released_at":""},{"code":"tk-ex-latia","name":"EX trainer Kit (Latias)","card_count":10,"released_at":""},{"code":"ex5.5","name":"Pok\u00e9 Card Creator Pack","card_count":5,"released_at":""},{"code":"ex5","name":"Hidden Legends","card_count":102,"released_at":""},{"code":"ex4","name":"Team Magma vs Team Aqua","card_count":97,"released_at":""},{"code":"ex3","name":"Dragon","card_count":100,"released_at":""},{"code":"np","name":"Nintendo Black Star Promos","card_count":40,"released_at":""},{"code":"ex2","name":"Sandstorm","card_count":100,"released_at":""},{"code":"ex1","name":"Ruby & Sapphire","card_count":109,"released_at":""},{"code":"ecard3","name":"Skyridge","card_count":182,"released_at":""},{"code":"ecard2","name":"Aquapolis","card_count":186,"released_at":""},{"code":"bog","name":"Best of game","card_count":9,"released_at":""},{"code":"ecard1","name":"Expedition Base Set","card_count":165,"released_at":""},{"code":"sp","name":"Sample","card_count":10,"released_at":""},{"code":"lc","name":"Legendary Collection","card_count":110,"released_at":""},{"code":"neo4","name":"Neo Destiny","card_count":113,"released_at":""},{"code":"neo3","name":"Neo Revelation","card_count":66,"released_at":""},{"code":"si1","name":"Southern Islands","card_count":18,"released_at":""},{"code":"neo2","name":"Neo Discovery","card_count":75,"released_at":""},{"code":"neo1","name":"Neo Genesis","card_count":111,"released_at":""},{"code":"gym2","name":"Gym Challenge","card_count":132,"released_at":""},{"code":"gym1","name":"Gym Heroes","card_count":132,"released_at":""},{"code":"base5","name":"Team Rocket","card_count":83,"released_at":""},{"code":"base4","name":"Base Set 2","card_count":130,"released_at":""},{"code":"jumbo","name":"Jumbo cards","card_count":160,"released_at":""},{"code":"base3","name":"Fossil","card_count":62,"released_at":""},{"code":"wp","name":"W Promotional","card_count":7,"released_at":""},{"code":"basep","name":"Wizards Black Star Promos","card_count":53,"released_at":""},{"code":"base2","name":"Jungle","card_count":64,"released_at":""},{"code":"base1","name":"Base Set","card_count":102,"released_at":""},{"code":"miscp","name":"Miscellaneous Promos","card_count":1,"released_at":""}];
+    const VARIANT_LABELS = {
+      'normal': 'Normal',
+      'holo': 'Holo',
+      'reverse': 'Reverse Holo',
+      'reverse::pokeball': 'Poké Ball',
+      'reverse::masterball': 'Master Ball',
+      'holo::pokeball': 'Holo Poké Ball',
+      'holo::masterball': 'Holo Master Ball',
+      'holo::cosmos': 'Cosmos Holo',
+      'firstEdition': '1st Edition'
+    };
+    function variantKey(type, foil) {
+      if (foil) return `${type}::${foil}`;
+      return type || 'normal';
+    }
+    function variantLabel(key) {
+      return VARIANT_LABELS[key] || key.replace(/::/g, ' / ');
+    }
+    function variantBadgeClass(key) {
+      if (key.includes('pokeball')) return 'pokeball';
+      if (key.includes('masterball')) return 'masterball';
+      if (key.startsWith('reverse')) return 'rh';
+      if (key.startsWith('holo')) return 'holo';
+      return '';
+    }
+    /** Master-set order: Normal → Reverse Holo → Poké Ball → Master Ball (then other foils) */
+    function pokemonVariantRank(key) {
+      const k = String(key || 'normal').toLowerCase();
+      if (k === 'normal' || k === 'nonfoil') return 0;
+      if (k === 'reverse' || k === 'reverseholofoil' || k === 'reverse-holofoil') return 1;
+      if (k.includes('pokeball')) return 2;
+      if (k.includes('masterball')) return 3;
+      if (k === 'holo' || k === 'holofoil' || k.startsWith('holo::')) return 4;
+      if (k.includes('cosmos')) return 5;
+      if (k.includes('first')) return 6;
+      return 50;
+    }
+    function pokemonCollectorNum(v) {
+      const n = parseInt(String(v || '').replace(/[^\d]/g, ''), 10);
+      return isNaN(n) ? 999999 : n;
+    }
+    function sortPokemonPrintings(list) {
+      return (list || []).slice().sort((a, b) => {
+        const na = pokemonCollectorNum(a.collectorNumber);
+        const nb = pokemonCollectorNum(b.collectorNumber);
+        if (na !== nb) return na - nb;
+        // same number → secondary string compare for 001a vs 001b style
+        const sa = String(a.collectorNumber || '');
+        const sb = String(b.collectorNumber || '');
+        if (sa !== sb) return sa.localeCompare(sb, undefined, { numeric: true });
+        const ra = pokemonVariantRank(a.variantKey || a.finish);
+        const rb = pokemonVariantRank(b.variantKey || b.finish);
+        if (ra !== rb) return ra - rb;
+        return (a.name || '').localeCompare(b.name || '');
+      });
+    }
+    function priceFromTcgPlayerBlock(tp, preferKeys) {
+      if (!tp || typeof tp !== 'object') return null;
+      const keys = preferKeys || ['marketPrice', 'market', 'midPrice', 'mid', 'lowPrice', 'low'];
+      // block may be nested by finish name
+      for (const finish of ['normal', 'holofoil', 'reverse-holofoil', 'reverseHolofoil', '1stEditionHolofoil', 'unlimitedHolofoil']) {
+        const b = tp[finish];
+        if (b && typeof b === 'object') {
+          for (const k of ['marketPrice', 'market', 'midPrice', 'mid', 'lowPrice', 'low']) {
+            if (b[k] != null && !isNaN(Number(b[k]))) return Number(b[k]);
+          }
+        }
+      }
+      for (const k of keys) {
+        if (tp[k] != null && !isNaN(Number(tp[k]))) return Number(tp[k]);
+      }
+      return null;
+    }
+    function priceForPokemonVariant(detail, key) {
+      const tp = (detail?.pricing || {}).tcgplayer || {};
+      // Prefer finish-specific block
+      if (key.includes('reverse') || key.includes('pokeball') || key.includes('masterball')) {
+        const b = tp['reverse-holofoil'] || tp['reverseHolofoil'] || tp['holofoil'];
+        if (b) {
+          for (const k of ['marketPrice', 'market', 'midPrice', 'mid']) {
+            if (b[k] != null) return Number(b[k]);
+          }
+        }
+      }
+      if (key.startsWith('holo')) {
+        const b = tp['holofoil'] || tp['holo'];
+        if (b) {
+          for (const k of ['marketPrice', 'market', 'midPrice', 'mid']) {
+            if (b[k] != null) return Number(b[k]);
+          }
+        }
+      }
+      const b = tp['normal'] || tp;
+      if (b && typeof b === 'object') {
+        for (const k of ['marketPrice', 'market', 'midPrice', 'mid', 'lowPrice', 'low']) {
+          if (b[k] != null && typeof b[k] !== 'object') return Number(b[k]);
+        }
+      }
+      return priceFromTcgPlayerBlock(tp);
+    }
+    function expandPokemonCard(card) {
+      // Returns array of selectable printings — one per real-world variant
+      const baseId = card.id;
+      const name = card.name;
+      const setId = card.set?.id || '';
+      const setName = card.set?.name || '';
+      const number = card.localId || card.number || '';
+      const image = card.image ? `${card.image}/high.webp` : '';
+      const rarity = card.rarity || '';
+      const detailed = Array.isArray(card.variants_detailed) ? card.variants_detailed : [];
+      const flags = card.variants || {};
+      const out = [];
+      const seen = new Set();
+
+      function push(type, foil, detail) {
+        const key = variantKey(type, foil || null);
+        if (seen.has(key)) return;
+        seen.add(key);
+        const price = detail ? priceForPokemonVariant(detail, key) : null;
+        out.push({
+          game: 'pokemon',
+          scryfallId: `${baseId}::${key}`, // reuse field as universal card key
+          pkmId: baseId,
+          variantKey: key,
+          name,
+          set: setId,
+          setName,
+          collectorNumber: String(number),
+          image,
+          rarity,
+          price: price,
+          priceFoil: null,
+          finish: key, // store variant as finish for display/matching
+          variantLabel: variantLabel(key)
+        });
+      }
+
+      if (detailed.length) {
+        for (const d of detailed) {
+          push(d.type || 'normal', d.foil || null, d);
+        }
+      } else {
+        // Fallback from boolean flags
+        if (flags.normal) push('normal', null, null);
+        if (flags.holo) push('holo', null, null);
+        if (flags.reverse) push('reverse', null, null);
+        if (flags.firstEdition) push('firstEdition', null, null);
+        if (!out.length) push('normal', null, null);
+      }
+      return out;
+    }
+    async function fetchPokemonSets() {
+      const normalize = (list) => (list || []).map(s => ({
+        code: s.code || s.id,
+        name: s.name || s.code || s.id,
+        card_count: s.card_count != null ? s.card_count : ((s.cardCount && (s.cardCount.total || s.cardCount.official)) || s.total || s.printedTotal || 0),
+        released_at: s.released_at || s.releaseDate || '',
+        icon: s.icon || s.logo || (s.images && (s.images.logo || s.images.symbol)) || ''
+      })).filter(s => s.code);
+
+      const tryUrls = [
+        `${PKMN_API}/sets`,
+        'https://api.tcgdex.net/v2/en/sets',
+        'https://api.pokemontcg.io/v2/sets?pageSize=250'
+      ];
+
+      for (const url of tryUrls) {
+        for (let attempt = 1; attempt <= 2; attempt++) {
+          try {
+            const res = await fetch(url, { mode: 'cors', cache: 'no-store', credentials: 'omit' });
+            if (!res.ok) throw new Error('HTTP ' + res.status);
+            const data = await res.json();
+            let list = Array.isArray(data) ? data : (data.data || []);
+            list = normalize(list);
+            if (!list.length) throw new Error('empty');
+            // TCGdex list is oldest-first; reverse for newer sets on top
+            if (url.includes('tcgdex')) list = list.slice().reverse();
+            else list.sort((a, b) => String(b.released_at).localeCompare(String(a.released_at)));
+            return list;
+          } catch (e) {
+            console.warn('sets fetch failed', url, attempt, e);
+            await new Promise(r => setTimeout(r, 250 * attempt));
+          }
+        }
+      }
+
+      // Built-in snapshot so Browse Sets always works offline / when APIs block the browser
+      if (typeof PKMN_SETS_FALLBACK !== 'undefined' && PKMN_SETS_FALLBACK.length) {
+        console.warn('Using built-in Pokémon sets fallback');
+        toast('Using offline set list (live API unreachable)');
+        return normalize(PKMN_SETS_FALLBACK);
+      }
+      throw new Error('Failed to fetch');
+    }
+    async function fetchPokemonSetCards(setId) {
+      let set = null;
+      let briefs = [];
+
+      // TCGdex set roster
+      try {
+        const res = await fetch(`${PKMN_API}/sets/${encodeURIComponent(setId)}`, { mode: 'cors', cache: 'no-store', credentials: 'omit' });
+        if (res.ok) {
+          set = await res.json();
+          briefs = set.cards || [];
+        }
+      } catch (e) {
+        console.warn('TCGdex set failed', e);
+      }
+
+      // Fallback: pokemontcg.io cards in set
+      if (!briefs.length) {
+        try {
+          let page = 1;
+          const all = [];
+          while (page <= 20) {
+            const url = `https://api.pokemontcg.io/v2/cards?q=set.id:${encodeURIComponent(setId)}&pageSize=250&page=${page}`;
+            const res = await fetch(url, { mode: 'cors', cache: 'no-store', credentials: 'omit' });
+            if (!res.ok) break;
+            const data = await res.json();
+            const chunk = data.data || [];
+            if (!chunk.length) break;
+            all.push(...chunk);
+            if (all.length >= (data.totalCount || all.length)) break;
+            page++;
+            await new Promise(r => setTimeout(r, 80));
+          }
+          if (all.length) {
+            briefs = all.map(c => ({
+              id: c.id,
+              name: c.name,
+              localId: c.number,
+              image: c.images && (c.images.large || c.images.small),
+              rarity: c.rarity,
+              _ptcg: c
+            }));
+            set = { id: setId, name: (all[0].set && all[0].set.name) || setId, cardCount: { reverse: 1 } };
+          }
+        } catch (e) {
+          console.warn('pokemontcg set cards failed', e);
+        }
+      }
+
+      if (!briefs.length) {
+        throw new Error('Could not reach card data for this set (network). Try again on Wi‑Fi or later.');
+      }
+
+      const quick = [];
+      for (const b of briefs) {
+        if (b._ptcg) {
+          // Expand from TCGPlayer price keys on pokemontcg card
+          const prices = ((b._ptcg.tcgplayer || {}).prices) || {};
+          const keys = Object.keys(prices);
+          const variants = keys.length ? keys : ['normal'];
+          const mapKey = (k) => {
+            const l = k.toLowerCase();
+            if (l.includes('reverse')) return 'reverse';
+            if (l.includes('holo')) return 'holo';
+            if (l.includes('1st')) return 'firstEdition';
+            return 'normal';
+          };
+          for (const k of variants) {
+            const vk = mapKey(k);
+            const market = prices[k] && (prices[k].market != null ? prices[k].market : prices[k].mid);
+            quick.push({
+              game: 'pokemon',
+              scryfallId: `${b.id}::${vk}`,
+              pkmId: b.id,
+              variantKey: vk,
+              name: b.name,
+              set: setId,
+              setName: set.name || setId,
+              collectorNumber: String(b.localId || ''),
+              image: b.image || '',
+              rarity: b.rarity || '',
+              price: market != null ? Number(market) : null,
+              priceFoil: null,
+              finish: vk,
+              variantLabel: variantLabel(vk)
+            });
+          }
+        } else {
+          const card = {
+            id: b.id,
+            name: b.name,
+            localId: b.localId,
+            image: b.image,
+            set: { id: set.id, name: set.name },
+            variants: { normal: true, reverse: !!(set.cardCount && set.cardCount.reverse), holo: false },
+            rarity: b.rarity || ''
+          };
+          quick.push(...expandPokemonCard(card));
+        }
+      }
+      state.currentSetCards = sortPokemonPrintings(quick);
+      try { renderSetCards(); } catch (e) {}
+
+      // Enrich via TCGdex detail when possible (Poké Ball / Master Ball)
+      if (!briefs[0] || briefs[0]._ptcg) return state.currentSetCards;
+
+      const batchSize = 6;
+      const byId = new Map();
+      for (let i = 0; i < briefs.length; i += batchSize) {
+        const batch = briefs.slice(i, i + batchSize);
+        await Promise.all(batch.map(async (b) => {
+          try {
+            const r = await fetch(`${PKMN_API}/cards/${encodeURIComponent(b.id)}`, { mode: 'cors', cache: 'no-store', credentials: 'omit' });
+            if (!r.ok) return;
+            const full = await r.json();
+            if (!full.set) full.set = { id: set.id, name: set.name };
+            byId.set(b.id, expandPokemonCard(full));
+          } catch (e) {}
+        }));
+        if (byId.size) {
+          const merged = [];
+          const seen = new Set();
+          for (const b of briefs) {
+            const rows = byId.has(b.id) ? byId.get(b.id) : quick.filter(c => c.pkmId === b.id);
+            for (const row of rows) {
+              if (seen.has(row.scryfallId)) continue;
+              seen.add(row.scryfallId);
+              merged.push(row);
+            }
+          }
+          state.currentSetCards = sortPokemonPrintings(merged);
+          try { renderSetCards(); } catch (e) {}
+        }
+        await new Promise(r => setTimeout(r, 150));
+      }
+      return sortPokemonPrintings(state.currentSetCards);
+    }
+    async function searchPokemon(name) {
+      // TCGdex has limited search — use set list fallback via name endpoint if available
+      const res = await fetch(`${PKMN_API}/cards?name=${encodeURIComponent(name)}`);
+      if (!res.ok) {
+        // fuzzy: scan nothing — try official search path
+        throw new Error('search failed');
+      }
+      let data = await res.json();
+      if (!Array.isArray(data)) data = data.data || [];
+      const expanded = [];
+      for (const c of data.slice(0, 40)) {
+        // list endpoint may be brief — fetch full when needed
+        if (c.variants_detailed || c.variants) {
+          expanded.push(...expandPokemonCard(c));
+        } else {
+          try {
+            const r = await fetch(`${PKMN_API}/cards/${encodeURIComponent(c.id)}`);
+            if (r.ok) expanded.push(...expandPokemonCard(await r.json()));
+            else expanded.push(...expandPokemonCard(c));
+          } catch (e) {
+            expanded.push(...expandPokemonCard(c));
+          }
+        }
+      }
+      return expanded;
+    }
+    function setGame(game) {
+      if (game !== 'mtg' && game !== 'pokemon') return;
+      state.game = game;
+      try { store.setItem('cardvault_game', game); } catch (e) {}
+      document.querySelectorAll('#gameToggle button').forEach(b => {
+        b.classList.toggle('active', b.dataset.game === game);
+      });
+      // Reset browse caches
+      state.sets = [];
+      state.currentSetCards = [];
+      state.currentSetCode = null;
+      state.searchResults = [];
+      state.selected.clear();
+      updateBulkBars();
+      // Stay on same tab; re-render
+      if (state.tab === 'home') renderHome();
+      else if (state.tab === 'sets') {
+        document.getElementById('setListArea').innerHTML = '<div class="loading">Loading sets…</div>';
+        document.getElementById('setListArea').style.display = 'block';
+        document.getElementById('setCardsArea').style.display = 'none';
+        loadSets();
+      } else if (state.tab === 'search') {
+        document.getElementById('searchContent').innerHTML = '';
+      } else if (state.tab === 'collection' || state.tab === 'watch') {
+        // If current folder is other game, go home
+        const f = folderById(state.activeFolderId);
+        if (f && (f.game || 'mtg') !== game) goHome();
+        else renderCollection();
+      }
+      renderFolders();
+      toast(game === 'pokemon' ? 'Pokémon mode' : 'MTG mode');
+    }
+    function folderGame(f) {
+      return (f && f.game) === 'pokemon' ? 'pokemon' : 'mtg';
+    }
+    function foldersForCurrentGame(kind) {
+      return foldersOfKind(kind).filter(f => folderGame(f) === state.game);
+    }
+    function itemsForCurrentGame() {
+      return state.items.filter(i => (i.game || 'mtg') === state.game);
+    }
+
     // ---------- tabs ----------
     function switchTab(tab, opts = {}) {
       state.tab = tab;
       state.selected.clear();
       updateBulkBars();
       closeSortPanel();
-      document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t.dataset.tab === tab));
-      const isList = tab === 'collection' || tab === 'watch';
-      document.getElementById('panel-collection').style.display = isList ? 'block' : 'none';
+      // Map folder drill-down onto collection/watch for active tab highlight
+      const tabHighlight = (tab === 'collection' || tab === 'watch') ? 'home' : tab;
+      document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t.dataset.tab === tabHighlight));
+      const isFolder = tab === 'collection' || tab === 'watch';
+      const isHome = tab === 'home';
+      document.getElementById('panel-home').style.display = isHome ? 'block' : 'none';
+      document.getElementById('panel-collection').style.display = isFolder ? 'block' : 'none';
       document.getElementById('panel-sets').style.display = tab === 'sets' ? 'block' : 'none';
       document.getElementById('panel-search').style.display = tab === 'search' ? 'block' : 'none';
       const sub = document.getElementById('collectionSubbar');
       const fab = document.getElementById('sortFab');
-      if (sub) sub.classList.toggle('show', isList);
-      if (fab) fab.style.display = isList ? 'flex' : 'none';
-
-      // Ensure active folder matches the tab's list kind
-      if (isList && !opts.keepFolder) {
-        const kind = tab === 'watch' ? 'watch' : 'collection';
-        if (!isWatchFolder(state.activeFolderId) && kind === 'watch' ||
-            isWatchFolder(state.activeFolderId) && kind === 'collection') {
-          const first = foldersOfKind(kind)[0];
-          if (first) state.activeFolderId = first.id;
+      const fbar = document.getElementById('folderViewBar');
+      // Subbar: desktop convenience; phone uses folder-view-bar
+      if (sub) sub.classList.remove('show');
+      if (fab) fab.style.display = isFolder ? 'flex' : 'none';
+      if (fbar) {
+        fbar.classList.toggle('show', isFolder);
+        if (isFolder) {
+          const f = folderById(state.activeFolderId);
+          document.getElementById('folderViewTitle').textContent = f ? f.name : 'Folder';
         }
       }
       renderFolders();
       if (tab === 'sets' && !state.sets.length) loadSets();
-      if (isList) renderCollection();
+      if (isHome) renderHome();
+      if (isFolder) renderCollection();
+    }
+    function goHome() {
+      switchTab('home');
+    }
+    function openFolderFromHome(id) {
+      state.activeFolderId = id;
+      const kind = listTabForFolder(id);
+      switchTab(kind, { keepFolder: true });
+    }
+    function folderTotals(folderId) {
+      const items = state.items.filter(i => i.folderId === folderId);
+      let qty = 0, market = 0, paid = 0, hasM = false, hasP = false;
+      for (const i of items) {
+        qty += i.quantity;
+        const m = priceForFinish(i, finishFromItem(i));
+        if (m != null) { market += m * i.quantity; hasM = true; }
+        if (i.purchasePrice != null) { paid += i.purchasePrice * i.quantity; hasP = true; }
+      }
+      return { qty, market, paid, hasM, hasP, entries: items.length };
+    }
+    function kindTotals(kind) {
+      const folders = foldersOfKind(kind);
+      let qty = 0, market = 0, paid = 0, hasM = false, hasP = false;
+      for (const f of folders) {
+        const t = folderTotals(f.id);
+        qty += t.qty;
+        market += t.market;
+        paid += t.paid;
+        if (t.hasM) hasM = true;
+        if (t.hasP) hasP = true;
+      }
+      return { qty, market, paid, hasM, hasP, folderCount: folders.length };
+    }
+    function renderHome() {
+      const el = document.getElementById('homeContent');
+      if (!el) return;
+      const owned = kindTotals('collection');
+      const watch = kindTotals('watch');
+      const ownedGain = owned.hasP && owned.hasM ? owned.market - owned.paid : null;
+      let gainHtml = '';
+      if (ownedGain != null) {
+        if (ownedGain > 0.005) gainHtml = `<span class="gain up">+${fmtMoney(ownedGain)}</span>`;
+        else if (ownedGain < -0.005) gainHtml = `<span class="gain down">${fmtMoney(ownedGain)}</span>`;
+        else gainHtml = `<span class="meta">±$0</span>`;
+      }
+
+      const ownedRows = foldersOfKind('collection').map(f => {
+        const t = folderTotals(f.id);
+        return `<div class="home-folder-row" role="button" tabindex="0" onclick="openFolderFromHome('${f.id}')">
+          <div class="home-folder-meta">
+            <div class="name">${escapeHtml(f.name)}</div>
+            <div class="detail">${t.qty} card${t.qty === 1 ? '' : 's'}${t.hasM ? ' · ' + fmtMoney(t.market) : ''}</div>
+          </div>
+          <button type="button" class="folder-x" title="Delete" onclick="event.stopPropagation(); deleteFolder('${f.id}')">×</button>
+          <span class="home-folder-chevron">›</span>
+        </div>`;
+      }).join('') || '<div class="empty" style="padding:16px">No collection folders yet.</div>';
+
+      const watchRows = foldersOfKind('watch').map(f => {
+        const t = folderTotals(f.id);
+        return `<div class="home-folder-row watch" role="button" tabindex="0" onclick="openFolderFromHome('${f.id}')">
+          <div class="home-folder-meta">
+            <div class="name">${escapeHtml(f.name)}</div>
+            <div class="detail">${t.qty} wanted${t.hasM ? ' · ' + fmtMoney(t.market) : ''}</div>
+          </div>
+          <button type="button" class="folder-x" title="Delete" onclick="event.stopPropagation(); deleteFolder('${f.id}')">×</button>
+          <span class="home-folder-chevron">›</span>
+        </div>`;
+      }).join('') || '<div class="empty" style="padding:16px">No watch list folders yet.</div>';
+
+      el.innerHTML = `
+        <div class="home-summary">
+          <div class="home-summary-row owned">
+            <div class="accent"></div>
+            <div class="home-summary-body">
+              <div class="label">Collection</div>
+              <div class="home-summary-line">
+                <span class="big">${owned.hasM ? fmtMoney(owned.market) : '—'}</span>
+                <span class="meta">${owned.qty} card${owned.qty === 1 ? '' : 's'}</span>
+                ${owned.hasP ? `<span class="meta">Paid ${fmtMoney(owned.paid)}</span>` : ''}
+                ${gainHtml}
+              </div>
+            </div>
+          </div>
+          <div class="home-summary-row watch">
+            <div class="accent"></div>
+            <div class="home-summary-body">
+              <div class="label">Watch List</div>
+              <div class="home-summary-line">
+                <span class="big">${watch.hasM ? fmtMoney(watch.market) : '—'}</span>
+                <span class="meta">${watch.qty} wanted</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        ${buildPriceChartSvg()}
+        <div class="home-section">
+          <div class="home-section-head">
+            <h2>My folders <span style="font-weight:600;color:var(--text-dim);font-size:0.8rem">(${state.game === 'pokemon' ? 'Pokémon' : 'MTG'})</span></h2>
+            <button type="button" class="folder-add-btn" onclick="openNewFolderModal('collection')">+ Folder</button>
+          </div>
+          <div class="home-folder-list">${ownedRows}</div>
+        </div>
+        <div class="home-section">
+          <div class="home-section-head">
+            <h2>Watch lists</h2>
+            <button type="button" class="folder-add-btn" onclick="openNewFolderModal('watch')">+ Watch</button>
+          </div>
+          <div class="home-folder-list">${watchRows}</div>
+        </div>
+      `;
     }
     function toggleSortPanel() {
       document.getElementById('sortPanel').classList.toggle('open');
@@ -1824,11 +2738,21 @@ service cloud.firestore {
         if (mode === 'name-desc') return (b.name || '').localeCompare(a.name || '');
         if (mode === 'number-asc') {
           const c = num(a.collectorNumber) - num(b.collectorNumber);
-          return c !== 0 ? c : (a.name || '').localeCompare(b.name || '');
+          if (c !== 0) return c;
+          if ((a.game || b.game) === 'pokemon') {
+            const vr = pokemonVariantRank(a.finish || a.variantKey) - pokemonVariantRank(b.finish || b.variantKey);
+            if (vr !== 0) return vr;
+          }
+          return (a.name || '').localeCompare(b.name || '');
         }
         if (mode === 'number-desc') {
           const c = num(b.collectorNumber) - num(a.collectorNumber);
-          return c !== 0 ? c : (a.name || '').localeCompare(b.name || '');
+          if (c !== 0) return c;
+          if ((a.game || b.game) === 'pokemon') {
+            const vr = pokemonVariantRank(a.finish || a.variantKey) - pokemonVariantRank(b.finish || b.variantKey);
+            if (vr !== 0) return vr;
+          }
+          return (a.name || '').localeCompare(b.name || '');
         }
         if (mode === 'price-asc' || mode === 'price-desc') {
           const pa = priceForFinish(a, finishFromItem(a));
@@ -1846,58 +2770,32 @@ service cloud.firestore {
     function renderFolders() {
       const bar = document.getElementById('foldersBar');
       const tab = state.tab;
-      let folders = [];
-      let showAdd = false;
-      let chipPrefix = false;
-
-      if (tab === 'collection') {
-        folders = foldersOfKind('collection');
-        showAdd = true;
-      } else if (tab === 'watch') {
-        folders = foldersOfKind('watch');
-        showAdd = true;
-      } else {
-        // Browse Sets / Search: show ALL folders so you can jump to any
-        folders = [
-          ...foldersOfKind('collection'),
-          ...foldersOfKind('watch')
-        ];
-        chipPrefix = true;
-        showAdd = false;
+      // Home: no horizontal folder strip (folders live on the home list)
+      if (tab === 'home' || tab === 'collection' || tab === 'watch') {
+        bar.innerHTML = '';
+        bar.classList.add('home-hidden');
+        return;
       }
-
+      bar.classList.remove('home-hidden');
+      // Browse Sets / Search: jump to any folder
+      const folders = [
+        ...foldersOfKind('collection'),
+        ...foldersOfKind('watch')
+      ];
       const chips = folders.map(f => {
         const count = state.items.filter(i => i.folderId === f.id).reduce((s, i) => s + i.quantity, 0);
-        const kindTag = chipPrefix
-          ? `<span class="folder-kind">${folderKind(f) === 'watch' ? 'Watch' : 'Owned'}</span>`
-          : '';
-        const delBtn = (tab === 'collection' || tab === 'watch')
-          ? `<button type="button" class="folder-x" title="Delete folder" onclick="event.stopPropagation(); deleteFolder('${f.id}')">×</button>`
-          : '';
+        const kindTag = `<span class="folder-kind">${folderKind(f) === 'watch' ? 'Watch' : 'Owned'}</span>`;
         const watchCls = folderKind(f) === 'watch' ? ' watch-chip' : '';
         return `<div class="folder-chip${watchCls} ${f.id === state.activeFolderId ? 'active' : ''}" onclick="selectFolder('${f.id}')">
           ${kindTag}
           <span>${escapeHtml(f.name)}</span>
           <span class="count">${count}</span>
-          ${delBtn}
         </div>`;
       }).join('');
-
-      const addBtn = showAdd
-        ? `<button type="button" class="folder-add-btn" onclick="openNewFolderModal()">+ Folder</button>`
-        : '';
-      bar.innerHTML = chips + addBtn;
+      bar.innerHTML = chips;
     }
     function selectFolder(id) {
-      state.activeFolderId = id;
-      const targetTab = listTabForFolder(id);
-      // Always navigate to the list tab that owns this folder when not already there
-      if (state.tab !== targetTab) {
-        switchTab(targetTab, { keepFolder: true });
-        return;
-      }
-      renderFolders();
-      renderCollection();
+      openFolderFromHome(id);
     }
     function deleteFolder(id) {
       const folder = folderById(id);
@@ -1920,10 +2818,12 @@ service cloud.firestore {
       }
       saveState();
       renderFolders();
-      if (state.tab === 'collection' || state.tab === 'watch') renderCollection();
+      if (state.tab === 'home') renderHome();
+      else if (state.tab === 'collection' || state.tab === 'watch') renderCollection();
       toast('Folder deleted');
     }
-    function openNewFolderModal() {
+    function openNewFolderModal(kind) {
+      state.pendingFolderKind = (kind === 'watch') ? 'watch' : 'collection';
       document.getElementById('folderNameInput').value = '';
       openModal('folderModal');
       setTimeout(() => document.getElementById('folderNameInput').focus(), 80);
@@ -1931,23 +2831,24 @@ service cloud.firestore {
     function createFolder() {
       const name = document.getElementById('folderNameInput').value.trim();
       if (!name) return toast('Enter a name');
-      const kind = (state.tab === 'watch') ? 'watch' : 'collection';
-      // If creating while on sets/search, use collection by default
+      let kind = state.pendingFolderKind || 'collection';
+      if (state.tab === 'watch') kind = 'watch';
+      if (state.tab === 'collection') kind = 'collection';
       const folder = {
         id: crypto.randomUUID(),
         name,
         kind,
+        game: state.game || 'mtg',
         sortOrder: state.folders.length
       };
       state.folders.push(folder);
       state.activeFolderId = folder.id;
       saveState();
       closeModal('folderModal');
-      // Stay on / switch to the list that owns this folder
-      if (state.tab !== kind) switchTab(kind, { keepFolder: true });
-      else {
-        renderFolders();
-        renderCollection();
+      if (state.tab === 'home') {
+        renderHome();
+      } else {
+        openFolderFromHome(folder.id);
       }
       toast(`Created "${name}"`);
     }
@@ -2022,32 +2923,22 @@ service cloud.firestore {
       const isWatchList = state.tab === 'watch' || isWatchFolder(state.activeFolderId);
       if (isWatchList) {
         valueBar.innerHTML = `
-          <div class="value-stat market">
-            <span class="value-label">Market Value</span>
-            <span class="value-num">${hasNow ? fmtMoney(totalNow) : '—'}</span>
-          </div>
-          <div class="value-stat cards">
-            <span class="value-label">Wanted</span>
-            <span class="value-num muted">${cardCount}</span>
+          <div class="value-strip">
+            <span class="vs-main">${hasNow ? fmtMoney(totalNow) : '—'}</span>
+            <span class="vs-meta">${cardCount} wanted</span>
           </div>
         `;
       } else {
+        const gainCls = diffClass === 'up' || diffClass === 'down' ? diffClass : '';
+        const gainPart = (hasPaid && hasNow)
+          ? `<span class="vs-gain ${gainCls}">${diffText}</span>`
+          : '';
         valueBar.innerHTML = `
-          <div class="value-stat paid">
-            <span class="value-label">Paid</span>
-            <span class="value-num muted">${hasPaid ? fmtMoney(totalPaid) : '—'}</span>
-          </div>
-          <div class="value-stat market">
-            <span class="value-label">Market</span>
-            <span class="value-num">${hasNow ? fmtMoney(totalNow) : '—'}</span>
-          </div>
-          <div class="value-stat gain ${diffClass}">
-            <span class="value-label">Gain / Loss</span>
-            <span class="value-num ${diffClass === 'flat' ? 'muted' : diffClass}">${diffText}</span>
-          </div>
-          <div class="value-stat cards">
-            <span class="value-label">Cards</span>
-            <span class="value-num muted">${cardCount}</span>
+          <div class="value-strip">
+            <span class="vs-main">${hasNow ? fmtMoney(totalNow) : '—'}</span>
+            <span class="vs-meta">${cardCount} card${cardCount === 1 ? '' : 's'}</span>
+            ${hasPaid ? `<span class="vs-meta">Paid ${fmtMoney(totalPaid)}</span>` : ''}
+            ${gainPart}
           </div>
         `;
       }
@@ -2082,7 +2973,9 @@ service cloud.firestore {
       let overlay = '';
       if (market != null || finish !== 'nonfoil') {
         let foilPip = '';
-        if (finish === 'surge') foilPip = `<span class="foil-pip sf">SF</span>`;
+        if ((i.game || '') === 'pokemon') {
+          // variant shown in title badge instead of F/SF pip
+        } else if (finish === 'surge') foilPip = `<span class="foil-pip sf">SF</span>`;
         else if (finish === 'foil') foilPip = `<span class="foil-pip">F</span>`;
         const mktTxt = market != null ? `<span class="paid-amt">${fmtMoney(market)}</span>` : '';
         if (foilPip || mktTxt) {
@@ -2117,7 +3010,7 @@ service cloud.firestore {
           ${overlay}
         </div>
         <div class="card-body">
-          <div class="card-name">${escapeHtml(title)}</div>
+          <div class="card-name">${(i.game === 'pokemon' && (i.variantLabel || i.finish)) ? `<span class="variant-badge ${variantBadgeClass(i.finish || '')}">${escapeHtml(i.variantLabel || variantLabel(i.finish))}</span> ` : ''}${escapeHtml(title)}</div>
           <div class="card-meta">${metaParts.map(escapeHtml).join(' · ')}</div>
           <div class="card-row">
             <span class="card-qty">×${i.quantity}</span>
@@ -2194,30 +3087,57 @@ service cloud.firestore {
     /** Auto-refresh on open — like ManaBox. Always runs once per page load. */
     async function autoRefreshOnOpen() {
       const hasCards = state.items.some(i => i.scryfallId && !String(i.scryfallId).startsWith('import-'));
-      if (!hasCards) return;
-      // Refresh entire collection in the background
-      await refreshPrices('all', true);
+      if (hasCards) {
+        await refreshPrices('all', true);
+      }
+      try {
+        recordPriceSnapshot();
+        if (state.tab === 'home') renderHome();
+      } catch (e) { console.error(e); }
     }
 
     // ---------- sets browser ----------
     async function loadSets() {
       const area = document.getElementById('setListArea');
+      if (!area) return;
+      const mode = state.game === 'pokemon' ? 'Pokémon' : 'MTG';
+      area.innerHTML = `<div class="loading">Loading ${mode} sets…</div>`;
       try {
-        const res = await fetch('https://api.scryfall.com/sets');
-        const data = await res.json();
-        state.sets = (data.data || [])
-          .filter(s => !s.digital && s.card_count > 0)
-          .sort((a, b) => (b.released_at || '').localeCompare(a.released_at || ''));
+        if (state.game === 'pokemon') {
+          state.sets = await fetchPokemonSets();
+        } else {
+          const res = await fetch('https://api.scryfall.com/sets', { mode: 'cors' });
+          if (!res.ok) throw new Error('Scryfall HTTP ' + res.status);
+          const data = await res.json();
+          state.sets = (data.data || [])
+            .filter(s => !s.digital && s.card_count > 0)
+            .map(s => ({
+              code: s.code,
+              name: s.name,
+              card_count: s.card_count,
+              released_at: s.released_at || '',
+              icon: s.icon_svg_uri || ''
+            }))
+            .sort((a, b) => (b.released_at || '').localeCompare(a.released_at || ''));
+        }
+        if (!state.sets.length) throw new Error('No sets returned');
         renderSetList();
       } catch (e) {
-        area.innerHTML = `<div class="empty">Could not load sets. Check your connection.</div>`;
+        console.error('loadSets', state.game, e);
+        area.innerHTML = `<div class="empty">Could not load ${mode} sets.<br><br>
+          <span style="font-size:0.8rem;color:var(--text-dim)">${escapeHtml(String(e && e.message ? e.message : e))}</span><br><br>
+          <button type="button" class="btn btn-sm" onclick="loadSets()">Retry</button></div>`;
       }
     }
     function renderSetList() {
       const filter = (document.getElementById('setFilter').value || '').toLowerCase();
-      const list = state.sets.filter(s =>
-        !filter || s.name.toLowerCase().includes(filter) || s.code.toLowerCase().includes(filter)
-      );
+      const list = (state.sets || []).filter(s => {
+        if (!s || !s.code) return false;
+        if (!filter) return true;
+        const name = (s.name || '').toLowerCase();
+        const code = String(s.code).toLowerCase();
+        return name.includes(filter) || code.includes(filter);
+      });
       const area = document.getElementById('setListArea');
       area.style.display = 'block';
       document.getElementById('setCardsArea').style.display = 'none';
@@ -2225,15 +3145,19 @@ service cloud.firestore {
         area.innerHTML = `<div class="empty">No sets match</div>`;
         return;
       }
-      area.innerHTML = `<div class="set-list">${list.slice(0, 80).map(s => `
-        <div class="set-row" onclick="openSet('${s.code}', '${escapeHtml(s.name).replace(/'/g, "\\'")}')">
+      const limit = state.game === 'pokemon' ? 250 : 80;
+      area.innerHTML = `<div class="set-list">${list.slice(0, limit).map(s => {
+        const code = String(s.code);
+        const safeName = escapeHtml(s.name || code).replace(/'/g, "\\'");
+        const count = s.card_count != null ? s.card_count : '—';
+        return `<div class="set-row" onclick="openSet('${code.replace(/'/g, "\\'")}', '${safeName}')">
           <div>
-            <div class="set-name">${escapeHtml(s.name)}</div>
-            <div class="set-code">${s.code.toUpperCase()} · ${s.card_count} cards · ${s.released_at || ''}</div>
+            <div class="set-name">${escapeHtml(s.name || code)}</div>
+            <div class="set-code">${escapeHtml(code.toUpperCase())} · ${count} cards${s.released_at ? ' · ' + escapeHtml(String(s.released_at)) : ''}</div>
           </div>
           <span style="color:var(--text-dim)">›</span>
-        </div>
-      `).join('')}</div>`;
+        </div>`;
+      }).join('')}</div>`;
     }
     async function openSet(code, name) {
       state.currentSetCode = code;
@@ -2246,20 +3170,38 @@ service cloud.firestore {
 
       try {
         let cards = [];
-        let url = `https://api.scryfall.com/cards/search?q=set:${code}&unique=prints&order=set`;
-        while (url) {
-          const res = await fetch(url);
-          if (!res.ok) break;
-          const data = await res.json();
-          cards = cards.concat((data.data || []).map(normalizeScryfall));
-          url = data.has_more ? data.next_page : null;
-          if (url) await new Promise(r => setTimeout(r, 100));
+        if (state.game === 'pokemon') {
+          document.getElementById('setCardsGrid').innerHTML = `<div class="loading">Loading printings…</div>`;
+          cards = await fetchPokemonSetCards(code);
+        } else {
+          let url = `https://api.scryfall.com/cards/search?q=set:${encodeURIComponent(code)}&unique=prints&order=set`;
+          while (url) {
+            const res = await fetch(url);
+            if (!res.ok) break;
+            const data = await res.json();
+            cards = cards.concat((data.data || []).map(normalizeScryfall));
+            url = data.has_more ? data.next_page : null;
+            if (url) await new Promise(r => setTimeout(r, 100));
+          }
         }
-        state.currentSetCards = cards;
+        state.currentSetCards = cards || [];
+        if (!state.currentSetCards.length) {
+          document.getElementById('setCardsGrid').innerHTML = `<div class="empty">No cards in this set.</div>`;
+          return;
+        }
         renderSetCards();
       } catch (e) {
-        document.getElementById('setCardsGrid').innerHTML = `<div class="empty">Failed to load cards</div>`;
+        console.error(e);
+        document.getElementById('setCardsGrid').innerHTML = `<div class="empty">Failed to load cards.<br><br>
+          <span style="font-size:0.8rem;color:var(--text-dim)">${escapeHtml(String(e && e.message ? e.message : e))}</span><br><br>
+          <button type="button" class="btn btn-sm" onclick="openSet('${String(code).replace(/'/g, "\'")}', '${String(name).replace(/'/g, "\'")}')">Retry</button></div>`;
       }
+    }
+    function selectAllInSet() {
+      state.currentSetCards.forEach(c => state.selected.add(c.scryfallId));
+      updateBulkBars();
+      renderSetCards();
+      toast(`${state.selected.size} printings selected`);
     }
     function backToSetList() {
       state.currentSetCode = null;
@@ -2275,7 +3217,12 @@ service cloud.firestore {
         grid.innerHTML = `<div class="empty">No cards</div>`;
         return;
       }
-      grid.innerHTML = state.currentSetCards.map(c => selectableCardHtml(c)).join('');
+      let list = state.currentSetCards;
+      if (state.game === 'pokemon') {
+        list = sortPokemonPrintings(list);
+        state.currentSetCards = list;
+      }
+      grid.innerHTML = list.map(c => selectableCardHtml(c)).join('');
     }
 
     // ---------- search ----------
@@ -2296,14 +3243,19 @@ service cloud.firestore {
       state.selected.clear();
       updateBulkBars();
       try {
-        const res = await fetch(`https://api.scryfall.com/cards/search?q=${encodeURIComponent(q)}&unique=prints&order=name`);
-        if (res.status === 404) state.searchResults = [];
-        else if (!res.ok) throw new Error('fail');
-        else {
-          const data = await res.json();
-          state.searchResults = (data.data || []).slice(0, 48).map(normalizeScryfall);
+        if (state.game === 'pokemon') {
+          state.searchResults = sortPokemonPrintings(await searchPokemon(q));
+        } else {
+          const res = await fetch(`https://api.scryfall.com/cards/search?q=${encodeURIComponent(q)}&unique=prints&order=name`);
+          if (res.status === 404) state.searchResults = [];
+          else if (!res.ok) throw new Error('fail');
+          else {
+            const data = await res.json();
+            state.searchResults = (data.data || []).slice(0, 48).map(normalizeScryfall);
+          }
         }
       } catch (e) {
+        console.error(e);
         toast('Search failed');
         state.searchResults = [];
       }
@@ -2324,17 +3276,23 @@ service cloud.firestore {
       const selected = state.selected.has(c.scryfallId) ? 'selected' : '';
       let price = '';
       if (c.price != null) price = fmtMoney(c.price);
-      if (c.priceFoil != null) price += (price ? ' / ' : '') + 'F ' + fmtMoney(c.priceFoil);
+      if (c.game !== 'pokemon' && c.priceFoil != null) price += (price ? ' / ' : '') + 'F ' + fmtMoney(c.priceFoil);
       const num = c.collectorNumber ? `#${c.collectorNumber}` : '';
       const title = num ? `${num} — ${c.name}` : c.name;
-      return `<div class="card ${selected}" onclick="toggleSelect('${c.scryfallId}')" data-id="${c.scryfallId}">
+      let variantHtml = '';
+      if (c.game === 'pokemon' && c.variantLabel) {
+        const cls = variantBadgeClass(c.variantKey || c.finish || '');
+        variantHtml = `<span class="variant-badge ${cls}">${escapeHtml(c.variantLabel)}</span> `;
+      }
+      const safeId = String(c.scryfallId).replace(/\\/g, '\\\\').replace(/'/g, "\\'");
+      return `<div class="card ${selected}" onclick="toggleSelect('${safeId}')" data-id="${escapeHtml(c.scryfallId)}">
         <div class="check">✓</div>
         <div class="card-img-wrap">
           <img src="${c.image || ''}" loading="lazy" alt="" decoding="async" onerror="this.style.opacity=0.3" />
         </div>
         <div class="card-body">
-          <div class="card-name">${escapeHtml(title)}</div>
-          <div class="card-meta">${(c.set || '').toUpperCase()} · ${price}</div>
+          <div class="card-name">${variantHtml}${escapeHtml(title)}</div>
+          <div class="card-meta">${escapeHtml((c.set || '').toUpperCase())} · ${price || '—'}</div>
         </div>
       </div>`;
     }
@@ -2359,6 +3317,8 @@ service cloud.firestore {
         setBar.classList.toggle('show', n > 0 && state.tab === 'sets');
         document.getElementById('setSelectedCount').textContent = `${n} selected`;
       }
+      const always = document.getElementById('setAlwaysActions');
+      if (always) always.style.display = (state.tab === 'sets' && state.currentSetCode) ? 'flex' : 'none';
       if (searchBar) {
         searchBar.classList.toggle('show', n > 0 && state.tab === 'search');
         document.getElementById('searchSelectedCount').textContent = `${n} selected`;
@@ -2374,6 +3334,15 @@ service cloud.firestore {
       populateFolderSelects(state.activeFolderId);
       renderBulkCardList();
       onBulkFolderChange();
+      const foilRow = document.getElementById('bulkFoil');
+      if (foilRow) {
+        const wrap = foilRow.closest('label') || foilRow.parentElement;
+        // Hide MTG finish picker for Pokémon — variant already chosen per printing
+        const isPkm = state.bulkCards.some(c => c.game === 'pokemon') || state.game === 'pokemon';
+        foilRow.style.display = isPkm ? 'none' : '';
+        const lab = foilRow.previousElementSibling;
+        if (lab && lab.tagName === 'LABEL') lab.style.display = isPkm ? 'none' : '';
+      }
       openModal('bulkModal');
     }
     function confirmBulkAdd() {
@@ -2389,8 +3358,12 @@ service cloud.firestore {
         const quantity = Math.max(1, parseInt(qtyEl?.value) || 1);
         const paidRaw = paidEl?.value;
         const purchasePrice = watch || !paidRaw ? null : toUsd(parseFloat(paidRaw));
+        const cardGame = c.game || state.game || 'mtg';
+        // Pokémon: each printing is already a unique scryfallId (…::variant); keep its finish
+        const itemFinish = cardGame === 'pokemon' ? (c.finish || c.variantKey || 'normal') : finish;
+        const itemFoil = cardGame === 'pokemon' ? itemFinish !== 'normal' : foil;
         const existing = state.items.find(i =>
-          i.scryfallId === c.scryfallId && i.folderId === folderId && finishFromItem(i) === finish
+          i.scryfallId === c.scryfallId && i.folderId === folderId && finishFromItem(i) === itemFinish
         );
         if (existing) {
           existing.quantity += quantity;
@@ -2401,11 +3374,13 @@ service cloud.firestore {
         } else {
           state.items.push({
             id: crypto.randomUUID(),
+            game: cardGame,
             scryfallId: c.scryfallId,
             name: c.name, set: c.set, setName: c.setName,
             collectorNumber: c.collectorNumber, image: c.image,
             price: c.price, priceFoil: c.priceFoil,
-            folderId, quantity, foil, finish, condition,
+            variantLabel: c.variantLabel || null,
+            folderId, quantity, foil: itemFoil, finish: itemFinish, condition,
             purchasePrice, purchaseCurrency: 'USD',
             addedAt: Date.now()
           });
@@ -2676,7 +3651,10 @@ service cloud.firestore {
         currency: state.currency,
         usdCadRate: state.usdCadRate,
         rateUpdatedAt: state.rateUpdatedAt,
-        sortMode: state.sortMode
+        sortMode: state.sortMode,
+        priceHistory: state.priceHistory || [],
+        chartShowOwned: state.chartShowOwned !== false,
+        chartShowWatch: state.chartShowWatch !== false
       };
     }
     function applyBackupPayload(data) {
@@ -2689,6 +3667,9 @@ service cloud.firestore {
       if (data.usdCadRate) state.usdCadRate = data.usdCadRate;
       if (data.rateUpdatedAt) state.rateUpdatedAt = data.rateUpdatedAt;
       if (data.sortMode) state.sortMode = data.sortMode;
+      if (Array.isArray(data.priceHistory)) state.priceHistory = data.priceHistory;
+      if (typeof data.chartShowOwned === 'boolean') state.chartShowOwned = data.chartShowOwned;
+      if (typeof data.chartShowWatch === 'boolean') state.chartShowWatch = data.chartShowWatch;
       // ensure defaults
       state.folders = state.folders.map((f, idx) => ({
         ...f,
@@ -2706,7 +3687,7 @@ service cloud.firestore {
       saveState();
       updateCurrencyButton();
       renderFolders();
-      switchTab('collection', { keepFolder: true });
+      switchTab('home');
       toast('Backup restored');
     }
     function exportBackup() {
@@ -2886,10 +3867,15 @@ service cloud.firestore {
 
     // ---------- init ----------
     loadState();
+    try {
+      const g = store.getItem('cardvault_game');
+      if (g === 'pokemon' || g === 'mtg') state.game = g;
+    } catch (e) {}
+    document.querySelectorAll('#gameToggle button').forEach(b => {
+      b.classList.toggle('active', b.dataset.game === state.game);
+    });
     initFirebase();
-    renderFolders();
-    renderCollection();
-    document.getElementById('collectionSubbar')?.classList.add('show');
+    switchTab('home');
     document.querySelectorAll('.modal-overlay, .card-sheet-overlay').forEach(el => {
       el.addEventListener('click', e => { if (e.target === el) el.classList.remove('open'); });
     });
