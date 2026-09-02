@@ -1122,6 +1122,28 @@
       font-weight: 700;
       line-height: 1.25;
       margin-bottom: 2px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      min-width: 0;
+    }
+    .card-sheet-title .title-main {
+      flex: 1;
+      min-width: 0;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      text-align: left;
+    }
+    .card-sheet-title .variant-badge {
+      flex-shrink: 0;
+      font-size: 0.65rem;
+      text-transform: none; /* keep full names readable */
+      letter-spacing: 0.01em;
+      padding: 3px 8px;
+      border-radius: 8px;
+      max-width: 45%;
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
@@ -2250,6 +2272,7 @@ service cloud.firestore {
     }
     function finishFromItem(i) {
       if (i.finish) return i.finish;
+      if ((i.game || '') === 'pokemon') return i.foil ? 'holo' : 'normal';
       if (i.foil) return 'foil';
       return 'nonfoil';
     }
@@ -3577,9 +3600,10 @@ service cloud.firestore {
     function openEditItem(itemId, direction) {
       const item = state.items.find(i => i.id === itemId);
       if (!item) return;
-      // Build browse list from current folder order
-      // Browse within the same folder
-      const folderItems = state.items.filter(i => i.folderId === (item.folderId || state.activeFolderId));
+      // Same order as folder grid (number + Pokémon variant rank, etc.)
+      const folderItems = sortItems(
+        state.items.filter(i => i.folderId === (item.folderId || state.activeFolderId))
+      );
       state.browseIds = folderItems.map(i => i.id);
       state.browseIndex = state.browseIds.indexOf(itemId);
       state.editingItemId = itemId;
@@ -3589,6 +3613,44 @@ service cloud.firestore {
       fillCardModal(item, true, direction);
       updateCardNavUI();
       openModal('cardModal');
+    }
+    function populateFinishSelect(game, currentFinish) {
+      const sel = document.getElementById('modalFoil');
+      if (!sel) return;
+      const isPkm = game === 'pokemon';
+      if (isPkm) {
+        sel.innerHTML = `
+          <option value="normal">Normal</option>
+          <option value="reverse">Reverse Holo</option>
+          <option value="holo">Holo</option>
+          <option value="reverse::pokeball">Poké Ball</option>
+          <option value="reverse::masterball">Master Ball</option>
+          <option value="holo::cosmos">Cosmos Holo</option>
+          <option value="firstEdition">1st Edition</option>`;
+      } else {
+        sel.innerHTML = `
+          <option value="nonfoil">Non-foil</option>
+          <option value="foil">Foil</option>
+          <option value="surge">Surge Foil</option>`;
+      }
+      // Map stored finish onto option value
+      let v = currentFinish || (isPkm ? 'normal' : 'nonfoil');
+      if (isPkm) {
+        const k = String(v).toLowerCase();
+        if (k === 'nonfoil') v = 'normal';
+        else if (k === 'foil' && !k.includes('::')) v = 'holo';
+        // keep reverse::pokeball etc. as-is
+      } else {
+        if (v === 'normal') v = 'nonfoil';
+      }
+      // If value not in list, add temporary option so selection isn't blank
+      if (![...sel.options].some(o => o.value === v)) {
+        const opt = document.createElement('option');
+        opt.value = v;
+        opt.textContent = isPkm ? variantLabel(v) : v;
+        sel.appendChild(opt);
+      }
+      sel.value = v;
     }
     function updateCardNavUI() {
       const prev = document.getElementById('peekPrev');
@@ -3649,7 +3711,18 @@ service cloud.firestore {
         img.classList.remove('show');
       }
       const num = c.collectorNumber ? `#${c.collectorNumber}` : '';
-      document.getElementById('modalCardName').textContent = num ? `${num} — ${c.name}` : c.name;
+      const game = c.game || state.game || 'mtg';
+      const finishKey = finishFromItem(c);
+      const mainTitle = num ? `${num} — ${c.name || 'Card'}` : (c.name || 'Card');
+      const titleEl = document.getElementById('modalCardName');
+      if (game === 'pokemon') {
+        const vLabel = c.variantLabel || variantLabel(finishKey) || 'Normal';
+        const cls = variantBadgeClass(finishKey);
+        titleEl.innerHTML = `<span class="title-main">${escapeHtml(mainTitle)}</span>` +
+          `<span class="variant-badge ${cls}">${escapeHtml(vLabel)}</span>`;
+      } else {
+        titleEl.textContent = mainTitle;
+      }
       document.getElementById('modalCardSet').textContent =
         `${c.setName || ''} (${(c.set || '').toUpperCase()})`;
       populateFolderSelects(isItem ? c.folderId : state.activeFolderId);
@@ -3659,13 +3732,13 @@ service cloud.firestore {
         document.getElementById('modalPaid').value = c.purchasePrice != null
           ? (fromUsd(c.purchasePrice)).toFixed(2)
           : '';
-        document.getElementById('modalFoil').value = finishFromItem(c);
+        populateFinishSelect(game, finishKey);
         document.getElementById('modalCondition').value = c.condition || 'NM';
         updatePaidVisibility(c.folderId);
       } else {
         document.getElementById('modalQty').value = 1;
         document.getElementById('modalPaid').value = '';
-        document.getElementById('modalFoil').value = 'nonfoil';
+        populateFinishSelect(game, game === 'pokemon' ? (c.finish || c.variantKey || 'normal') : 'nonfoil');
         document.getElementById('modalCondition').value = 'NM';
         updatePaidVisibility(state.activeFolderId);
       }
@@ -3677,9 +3750,18 @@ service cloud.firestore {
       const paidRaw = document.getElementById('modalPaid').value;
       // User types in active currency; store as USD — never for watch list
       const purchasePrice = isWatchFolder(folderIdForPaid) || paidRaw === '' ? null : toUsd(parseFloat(paidRaw));
-      const finish = document.getElementById('modalFoil').value || 'nonfoil';
-      const foil = finish !== 'nonfoil';
+      let finish = document.getElementById('modalFoil').value || 'nonfoil';
       const condition = document.getElementById('modalCondition').value;
+      // Resolve game from edited item or pending card
+      const ref = state.editingItemId
+        ? state.items.find(i => i.id === state.editingItemId)
+        : state.pendingCard;
+      const game = (ref && ref.game) || state.game || 'mtg';
+      if (game === 'pokemon' && (finish === 'nonfoil' || !finish)) finish = 'normal';
+      const foil = game === 'pokemon'
+        ? (finish !== 'normal' && finish !== 'nonfoil')
+        : (finish !== 'nonfoil');
+      const vLabel = game === 'pokemon' ? variantLabel(finish) : null;
       if (state.editingItemId) {
         const item = state.items.find(i => i.id === state.editingItemId);
         if (item) {
@@ -3690,6 +3772,10 @@ service cloud.firestore {
           item.foil = foil;
           item.finish = finish;
           item.condition = condition;
+          if (game === 'pokemon') {
+            item.variantLabel = vLabel;
+            item.game = 'pokemon';
+          }
           toast('Updated');
         }
       } else if (state.pendingCard) {
@@ -3707,10 +3793,12 @@ service cloud.firestore {
         } else {
           state.items.push({
             id: crypto.randomUUID(),
+            game,
             scryfallId: c.scryfallId,
             name: c.name, set: c.set, setName: c.setName,
             collectorNumber: c.collectorNumber, image: c.image,
             price: c.price, priceFoil: c.priceFoil,
+            variantLabel: vLabel || c.variantLabel || null,
             folderId, quantity, foil, finish, condition,
             purchasePrice, purchaseCurrency: 'USD',
             addedAt: Date.now()
