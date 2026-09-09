@@ -412,12 +412,12 @@
     .home-folder-row {
       display: flex;
       align-items: center;
-      gap: 10px;
+      gap: 8px;
       background: var(--surface);
       border: 1px solid var(--border);
-      border-left: 4px solid var(--accent);
+      border-left: 4px solid var(--folder-color, var(--accent));
       border-radius: 12px;
-      padding: 12px 12px 12px 12px;
+      padding: 12px 10px 12px 12px;
       cursor: pointer;
       transition: box-shadow 0.15s, border-color 0.15s;
       text-align: left;
@@ -426,20 +426,54 @@
       font: inherit;
       position: relative;
     }
-    .home-folder-row.watch {
-      background: var(--surface);
-      border-left-color: #6b7280;
-    }
     .home-folder-row:hover {
-      border-color: var(--accent);
-      border-left-color: var(--accent);
-      box-shadow: 0 0 0 1px var(--accent);
+      border-color: var(--folder-color, var(--accent));
+      border-left-color: var(--folder-color, var(--accent));
+      box-shadow: 0 0 0 1px var(--folder-color, var(--accent));
     }
-    .home-folder-row.watch:hover {
-      border-color: #6b7280;
-      border-left-color: #6b7280;
-      box-shadow: 0 0 0 1px #6b7280;
+    .home-folder-actions {
+      display: flex;
+      align-items: center;
+      gap: 2px;
+      flex-shrink: 0;
     }
+    .folder-edit-btn {
+      width: 28px;
+      height: 28px;
+      border: none;
+      background: transparent;
+      color: var(--text-dim);
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 0.85rem;
+      line-height: 1;
+      opacity: 0.75;
+    }
+    .folder-edit-btn:hover {
+      background: var(--surface2);
+      color: var(--text);
+      opacity: 1;
+    }
+    .color-swatch-grid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin: 8px 0 4px;
+    }
+    .color-swatch {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      border: 2px solid transparent;
+      cursor: pointer;
+      padding: 0;
+      box-shadow: inset 0 0 0 1px rgba(0,0,0,0.08);
+    }
+    .color-swatch.selected {
+      border-color: #111;
+      box-shadow: 0 0 0 2px #fff, 0 0 0 4px #111;
+    }
+    .color-swatch:hover { transform: scale(1.08); }
     .home-folder-meta {
       flex: 1;
       min-width: 0;
@@ -1618,15 +1652,18 @@ service cloud.firestore {
     </div>
   </div>
 
-  <!-- New Folder Modal -->
+  <!-- New / Edit Folder Modal -->
   <div class="modal-overlay" id="folderModal">
     <div class="modal">
-      <h2>New Folder</h2>
+      <h2 id="folderModalTitle">New Folder</h2>
       <label>Folder Name</label>
       <input type="text" id="folderNameInput" placeholder="e.g. Commander, Trades, MH3..." />
+      <label style="margin-top:10px;display:block">Accent color</label>
+      <div class="color-swatch-grid" id="folderColorSwatches"></div>
+      <input type="hidden" id="folderColorInput" value="#ea580c" />
       <div class="modal-actions">
         <button class="btn btn-secondary" onclick="closeModal('folderModal')">Cancel</button>
-        <button class="btn" onclick="createFolder()">Create</button>
+        <button class="btn" id="folderModalSaveBtn" onclick="saveFolderFromModal()">Create</button>
       </div>
     </div>
   </div>
@@ -1998,10 +2035,11 @@ service cloud.firestore {
         ...f,
         kind: f.kind === 'watch' ? 'watch' : 'collection',
         game: f.game === 'pokemon' ? 'pokemon' : 'mtg',
+        color: f.color || (f.kind === 'watch' ? '#6b7280' : '#ea580c'),
         sortOrder: f.sortOrder != null ? f.sortOrder : idx
       }));
       if (!state.folders.some(f => f.kind === 'collection')) {
-        state.folders.unshift({ id: crypto.randomUUID(), name: 'Main Collection', kind: 'collection', sortOrder: 0 });
+        state.folders.unshift({ id: crypto.randomUUID(), name: 'Main Collection', kind: 'collection', color: '#ea580c', sortOrder: 0 });
       }
       if (!state.folders.some(f => f.kind === 'watch')) {
         state.folders.push({ id: crypto.randomUUID(), name: 'Watch List', kind: 'watch', sortOrder: 1000 });
@@ -3030,12 +3068,16 @@ service cloud.firestore {
         const detail = isWatch
           ? `${t.qty} wanted${t.hasM ? ' · ' + fmtMoney(t.market) : ''}`
           : `${t.qty} card${t.qty === 1 ? '' : 's'}${t.hasM ? ' · ' + fmtMoney(t.market) : ''}`;
-        return `<div class="home-folder-row${isWatch ? ' watch' : ''}" role="button" tabindex="0" onclick="openFolderFromHome('${f.id}')">
+        const accent = folderAccentColor(f);
+        return `<div class="home-folder-row" role="button" tabindex="0" style="--folder-color:${accent}" onclick="openFolderFromHome('${f.id}')">
           <div class="home-folder-meta">
             <div class="name">${escapeHtml(f.name)}</div>
             <div class="detail">${detail}</div>
           </div>
-          <button type="button" class="folder-x" title="Delete" onclick="event.stopPropagation(); deleteFolder('${f.id}')">×</button>
+          <div class="home-folder-actions">
+            <button type="button" class="folder-edit-btn" title="Edit folder" onclick="event.stopPropagation(); openEditFolderModal('${f.id}')">✎</button>
+            <button type="button" class="folder-x" title="Delete" onclick="event.stopPropagation(); deleteFolder('${f.id}')">×</button>
+          </div>
           <span class="home-folder-chevron">›</span>
         </div>`;
       }).join('') || `<div class="empty" style="padding:16px">${isWatch ? 'No watch list folders yet.' : 'No collection folders yet.'}</div>`;
@@ -3191,15 +3233,93 @@ service cloud.firestore {
       else if (state.tab === 'collection' || state.tab === 'watch') renderCollection();
       toast('Folder deleted');
     }
+    const FOLDER_COLORS = [
+      { id: 'orange', hex: '#ea580c', label: 'Orange' },
+      { id: 'amber', hex: '#d97706', label: 'Amber' },
+      { id: 'red', hex: '#dc2626', label: 'Red' },
+      { id: 'rose', hex: '#e11d48', label: 'Rose' },
+      { id: 'pink', hex: '#db2777', label: 'Pink' },
+      { id: 'purple', hex: '#7c3aed', label: 'Purple' },
+      { id: 'violet', hex: '#8b5cf6', label: 'Violet' },
+      { id: 'indigo', hex: '#4f46e5', label: 'Indigo' },
+      { id: 'blue', hex: '#2563eb', label: 'Blue' },
+      { id: 'sky', hex: '#0284c7', label: 'Sky' },
+      { id: 'teal', hex: '#0d9488', label: 'Teal' },
+      { id: 'green', hex: '#16a34a', label: 'Green' },
+      { id: 'lime', hex: '#65a30d', label: 'Lime' },
+      { id: 'grey', hex: '#6b7280', label: 'Grey' },
+      { id: 'slate', hex: '#475569', label: 'Slate' },
+      { id: 'brown', hex: '#92400e', label: 'Brown' }
+    ];
+    function defaultFolderColor(kind) {
+      return kind === 'watch' ? '#6b7280' : '#ea580c';
+    }
+    function folderAccentColor(f) {
+      if (f && f.color && /^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/.test(f.color)) return f.color;
+      return defaultFolderColor(folderKind(f));
+    }
+    function renderFolderColorSwatches(selectedHex) {
+      const host = document.getElementById('folderColorSwatches');
+      if (!host) return;
+      const sel = (selectedHex || defaultFolderColor(state.pendingFolderKind || 'collection')).toLowerCase();
+      host.innerHTML = FOLDER_COLORS.map(c => {
+        const on = c.hex.toLowerCase() === sel ? ' selected' : '';
+        return `<button type="button" class="color-swatch${on}" title="${c.label}"
+          style="background:${c.hex}" data-hex="${c.hex}"
+          onclick="selectFolderColor('${c.hex}')"></button>`;
+      }).join('');
+      document.getElementById('folderColorInput').value = sel;
+    }
+    function selectFolderColor(hex) {
+      document.getElementById('folderColorInput').value = hex;
+      document.querySelectorAll('#folderColorSwatches .color-swatch').forEach(btn => {
+        btn.classList.toggle('selected', (btn.dataset.hex || '').toLowerCase() === hex.toLowerCase());
+      });
+    }
     function openNewFolderModal(kind) {
       state.pendingFolderKind = (kind === 'watch') ? 'watch' : 'collection';
+      state.editingFolderId = null;
+      document.getElementById('folderModalTitle').textContent = 'New Folder';
+      document.getElementById('folderModalSaveBtn').textContent = 'Create';
       document.getElementById('folderNameInput').value = '';
+      renderFolderColorSwatches(defaultFolderColor(state.pendingFolderKind));
       openModal('folderModal');
       setTimeout(() => document.getElementById('folderNameInput').focus(), 80);
     }
-    function createFolder() {
+    function openEditFolderModal(folderId) {
+      const f = folderById(folderId);
+      if (!f) return;
+      state.editingFolderId = folderId;
+      state.pendingFolderKind = folderKind(f);
+      document.getElementById('folderModalTitle').textContent = 'Edit Folder';
+      document.getElementById('folderModalSaveBtn').textContent = 'Save';
+      document.getElementById('folderNameInput').value = f.name || '';
+      renderFolderColorSwatches(folderAccentColor(f));
+      openModal('folderModal');
+      setTimeout(() => document.getElementById('folderNameInput').focus(), 80);
+    }
+    function saveFolderFromModal() {
       const name = document.getElementById('folderNameInput').value.trim();
       if (!name) return toast('Enter a name');
+      const color = document.getElementById('folderColorInput').value || defaultFolderColor(state.pendingFolderKind || 'collection');
+      if (state.editingFolderId) {
+        const f = folderById(state.editingFolderId);
+        if (!f) return;
+        f.name = name;
+        f.color = color;
+        saveState();
+        closeModal('folderModal');
+        state.editingFolderId = null;
+        renderFolders();
+        if (state.tab === 'home') renderHome();
+        else if (state.tab === 'collection' || state.tab === 'watch') {
+          const title = document.getElementById('folderViewTitle');
+          if (title && state.activeFolderId === f.id) title.textContent = f.name;
+          renderCollection();
+        }
+        toast('Folder updated');
+        return;
+      }
       let kind = state.pendingFolderKind || 'collection';
       if (state.tab === 'watch') kind = 'watch';
       if (state.tab === 'collection') kind = 'collection';
@@ -3207,6 +3327,7 @@ service cloud.firestore {
         id: crypto.randomUUID(),
         name,
         kind,
+        color,
         game: state.game || 'mtg',
         sortOrder: state.folders.length
       };
@@ -3221,6 +3342,8 @@ service cloud.firestore {
       }
       toast(`Created "${name}"`);
     }
+    // Back-compat alias
+    function createFolder() { saveFolderFromModal(); }
     function populateFolderSelects(preferredId) {
       const selected = preferredId || state.activeFolderId;
       const col = foldersOfKind('collection');
@@ -4130,13 +4253,14 @@ service cloud.firestore {
       state.folders = state.folders.map((f, idx) => ({
         ...f,
         kind: f.kind === 'watch' ? 'watch' : 'collection',
+        color: f.color || (f.kind === 'watch' ? '#6b7280' : '#ea580c'),
         sortOrder: f.sortOrder != null ? f.sortOrder : idx
       }));
       if (!state.folders.some(f => f.kind === 'collection')) {
-        state.folders.unshift({ id: crypto.randomUUID(), name: 'Main Collection', kind: 'collection', sortOrder: 0 });
+        state.folders.unshift({ id: crypto.randomUUID(), name: 'Main Collection', kind: 'collection', color: '#ea580c', sortOrder: 0 });
       }
       if (!state.folders.some(f => f.kind === 'watch')) {
-        state.folders.push({ id: crypto.randomUUID(), name: 'Watch List', kind: 'watch', sortOrder: 1000 });
+        state.folders.push({ id: crypto.randomUUID(), name: 'Watch List', kind: 'watch', color: '#6b7280', sortOrder: 1000 });
       }
       const first = state.folders.find(f => f.kind === 'collection') || state.folders[0];
       state.activeFolderId = first.id;
