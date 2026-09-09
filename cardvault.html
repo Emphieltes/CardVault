@@ -298,8 +298,15 @@
     }
     .home-chart-svg {
       width: 100%;
-      height: 140px;
+      height: 200px;
       display: block;
+      min-width: 100%;
+    }
+    .home-chart-card {
+      overflow: visible;
+    }
+    .home-dashboard .home-chart-card {
+      width: 100%;
     }
     .home-chart-legend {
       display: flex;
@@ -1663,7 +1670,7 @@ service cloud.firestore {
       currency: 'CAD',       // display currency: 'USD' | 'CAD'
       usdCadRate: 1.39,      // fallback until live rate loads
       rateUpdatedAt: null,
-      priceHistory: [],      // [{ date: 'YYYY-MM-DD', owned: number|null, watch: number|null }] USD totals
+      priceHistory: [],      // [{ date, mtgOwned, mtgWatch, pkmOwned, pkmWatch }] USD market totals
       chartShowOwned: true,
       chartShowWatch: true,
       homeListKind: 'collection' // 'collection' | 'watch' on Home
@@ -2048,91 +2055,179 @@ service cloud.firestore {
       const d = new Date();
       return d.toISOString().slice(0, 10);
     }
+    function normalizeHistoryPoint(p) {
+      // Migrate legacy {owned,watch} → treat as MTG if no game keys
+      if (!p || typeof p !== 'object') return null;
+      const out = { date: p.date };
+      if (p.mtgOwned != null || p.mtgWatch != null || p.pkmOwned != null || p.pkmWatch != null) {
+        out.mtgOwned = p.mtgOwned != null ? p.mtgOwned : null;
+        out.mtgWatch = p.mtgWatch != null ? p.mtgWatch : null;
+        out.pkmOwned = p.pkmOwned != null ? p.pkmOwned : null;
+        out.pkmWatch = p.pkmWatch != null ? p.pkmWatch : null;
+      } else {
+        // legacy single-game snapshot — keep under mtg so data isn't lost
+        out.mtgOwned = p.owned != null ? p.owned : null;
+        out.mtgWatch = p.watch != null ? p.watch : null;
+        out.pkmOwned = null;
+        out.pkmWatch = null;
+      }
+      return out;
+    }
     function recordPriceSnapshot() {
-      const owned = kindTotals('collection');
-      const watch = kindTotals('watch');
+      // Always snapshot ALL four series (independent of current game toggle)
+      const mtgOwned = kindTotals('collection', 'mtg');
+      const mtgWatch = kindTotals('watch', 'mtg');
+      const pkmOwned = kindTotals('collection', 'pokemon');
+      const pkmWatch = kindTotals('watch', 'pokemon');
       const date = todayKey();
       const point = {
         date,
-        owned: owned.hasM ? owned.market : null,
-        watch: watch.hasM ? watch.market : null
+        mtgOwned: mtgOwned.hasM ? mtgOwned.market : null,
+        mtgWatch: mtgWatch.hasM ? mtgWatch.market : null,
+        pkmOwned: pkmOwned.hasM ? pkmOwned.market : null,
+        pkmWatch: pkmWatch.hasM ? pkmWatch.market : null
       };
-      let hist = Array.isArray(state.priceHistory) ? state.priceHistory.slice() : [];
+      let hist = (Array.isArray(state.priceHistory) ? state.priceHistory : [])
+        .map(normalizeHistoryPoint)
+        .filter(Boolean);
       const idx = hist.findIndex(h => h.date === date);
-      if (idx >= 0) hist[idx] = point;
-      else hist.push(point);
+      if (idx >= 0) {
+        // merge: don't wipe a series that was null this pass if we somehow lack data
+        const prev = hist[idx];
+        hist[idx] = {
+          date,
+          mtgOwned: point.mtgOwned != null ? point.mtgOwned : prev.mtgOwned,
+          mtgWatch: point.mtgWatch != null ? point.mtgWatch : prev.mtgWatch,
+          pkmOwned: point.pkmOwned != null ? point.pkmOwned : prev.pkmOwned,
+          pkmWatch: point.pkmWatch != null ? point.pkmWatch : prev.pkmWatch
+        };
+      } else {
+        hist.push(point);
+      }
       hist.sort((a, b) => a.date.localeCompare(b.date));
-      // keep 30 days
       if (hist.length > 30) hist = hist.slice(hist.length - 30);
       state.priceHistory = hist;
       saveState();
     }
     function buildPriceChartSvg(opts = {}) {
       const kind = opts.kind || state.homeListKind || 'collection';
-      // Home toggle: show one series at a time (still respect settings toggles)
-      let showO = kind === 'collection' && state.chartShowOwned !== false;
-      let showW = kind === 'watch' && state.chartShowWatch !== false;
-      if (opts.showBoth) {
-        showO = state.chartShowOwned !== false;
-        showW = state.chartShowWatch !== false;
+      const game = state.game || 'mtg';
+      const isWatch = kind === 'watch';
+      if (isWatch && state.chartShowWatch === false) {
+        return `<div class="home-chart-card"><h3>Last 30 days</h3>
+          <div class="home-chart-empty">Watch list chart disabled in Settings.</div></div>`;
       }
-      if (!showO && !showW) {
-        return `<div class="home-chart-card"><h3>30-day value</h3>
-          <div class="home-chart-empty">Chart disabled in Settings.</div></div>`;
+      if (!isWatch && state.chartShowOwned === false) {
+        return `<div class="home-chart-card"><h3>Last 30 days</h3>
+          <div class="home-chart-empty">Collection chart disabled in Settings.</div></div>`;
       }
-      const hist = (state.priceHistory || []).slice(-30);
-      if (!hist.length) {
-        return `<div class="home-chart-card"><h3>30-day value</h3>
-          <div class="home-chart-empty">Chart will fill in as prices refresh each day (up to 30 days).</div></div>`;
+
+      const seriesKey = game === 'pokemon'
+        ? (isWatch ? 'pkmWatch' : 'pkmOwned')
+        : (isWatch ? 'mtgWatch' : 'mtgOwned');
+      const legacyKey = isWatch ? 'watch' : 'owned';
+
+      // Map date → value for this series
+      const byDate = {};
+      (Array.isArray(state.priceHistory) ? state.priceHistory : [])
+        .map(normalizeHistoryPoint)
+        .filter(Boolean)
+        .forEach(p => {
+          let v = p[seriesKey];
+          if (v == null && game === 'mtg' && p[legacyKey] != null) v = p[legacyKey];
+          if (v != null && !isNaN(v)) byDate[p.date] = Number(v);
+        });
+
+      // Full 30-day calendar window ending today (missing days = 0)
+      const days = [];
+      const today = new Date();
+      today.setHours(12, 0, 0, 0);
+      for (let i = 29; i >= 0; i--) {
+        const d = new Date(today);
+        d.setDate(today.getDate() - i);
+        const key = d.toISOString().slice(0, 10);
+        days.push({ date: key, v: byDate[key] != null ? byDate[key] : 0 });
       }
-      const w = 320, h = 140, padL = 8, padR = 8, padT = 12, padB = 22;
-      const vals = [];
-      hist.forEach(p => {
-        if (showO && p.owned != null) vals.push(p.owned);
-        if (showW && p.watch != null) vals.push(p.watch);
-      });
-      if (!vals.length) {
-        return `<div class="home-chart-card"><h3>30-day value</h3>
-          <div class="home-chart-empty">No priced cards yet to chart.</div></div>`;
+
+      const gameLabel = game === 'pokemon' ? 'Pokémon' : 'MTG';
+      const kindLabel = isWatch ? 'Watch list' : 'Collection';
+      const stroke = isWatch ? '#6b7280' : '#ea580c';
+      const fill = isWatch ? 'rgba(107,114,128,0.14)' : 'rgba(234,88,12,0.14)';
+
+      const hasAnyReal = days.some(p => p.v > 0);
+      if (!hasAnyReal && !Object.keys(byDate).length) {
+        return `<div class="home-chart-card">
+          <h3>${gameLabel} · ${kindLabel}</h3>
+          <p class="home-chart-sub">Last 30 days</p>
+          <div class="home-chart-empty">No snapshots yet. Open CardVault daily to record market value.</div>
+        </div>`;
       }
-      let minV = Math.min(...vals);
-      let maxV = Math.max(...vals);
-      if (maxV === minV) { minV = minV * 0.95; maxV = maxV * 1.05 || 1; }
+
+      // Y-axis ALWAYS from 0 → max (with small headroom)
+      const maxData = Math.max(...days.map(p => p.v), 0);
+      let maxV = maxData > 0 ? maxData * 1.08 : 1;
+      const minV = 0;
       const span = maxV - minV || 1;
-      const n = Math.max(hist.length, 2);
+
+      // Wide chart
+      const w = 480, h = 200;
+      const padL = 54, padR = 12, padT = 14, padB = 22;
+      const n = days.length; // 30
       const xAt = (i) => padL + (i / (n - 1)) * (w - padL - padR);
       const yAt = (v) => padT + (1 - (v - minV) / span) * (h - padT - padB);
-      function linePath(key) {
-        const pts = [];
-        hist.forEach((p, i) => {
-          const v = p[key];
-          if (v == null) return;
-          pts.push(`${pts.length ? 'L' : 'M'}${xAt(i).toFixed(1)},${yAt(v).toFixed(1)}`);
-        });
-        return pts.join(' ');
-      }
-      const stroke = showO ? 'var(--accent)' : '#6b7280';
-      const ownedPath = showO ? linePath('owned') : '';
-      const watchPath = showW ? linePath('watch') : '';
-      const first = hist[0]?.date || '';
-      const last = hist[hist.length - 1]?.date || '';
-      const fmtD = (s) => {
-        if (!s) return '';
-        const [, m, d] = s.split('-');
-        return `${Number(m)}/${Number(d)}`;
+
+      const fmtY = (v) => {
+        const d = fromUsd(v);
+        const sym = state.currency === 'CAD' ? 'C$' : '$';
+        if (d == null || isNaN(d)) return sym + '0';
+        // Keep axis compact but with commas: $1,234
+        return sym + Math.round(d).toLocaleString('en-US');
       };
-      const legend = [];
-      if (showO) legend.push('<span class="leg-owned">Collection</span>');
-      if (showW) legend.push('<span class="leg-watch">Watch list</span>');
+
+      // Y ticks from 0 to max (5 ticks)
+      const yTicks = 5;
+      let grid = '';
+      for (let i = 0; i < yTicks; i++) {
+        const v = minV + (span * i) / (yTicks - 1);
+        const y = yAt(v);
+        grid += `<line x1="${padL}" y1="${y.toFixed(1)}" x2="${(w - padR).toFixed(1)}" y2="${y.toFixed(1)}" stroke="#e5e7eb" stroke-width="1"/>`;
+        grid += `<text x="${padL - 6}" y="${(y + 3).toFixed(1)}" font-size="10" fill="#64748b" text-anchor="end">${fmtY(v)}</text>`;
+      }
+
+      const pts = days.map((p, i) => `${xAt(i).toFixed(1)},${yAt(p.v).toFixed(1)}`);
+      const lineD = pts.map((p, i) => (i === 0 ? 'M' : 'L') + p).join(' ');
+      const areaD = lineD +
+        ` L${xAt(n - 1).toFixed(1)},${yAt(0).toFixed(1)}` +
+        ` L${xAt(0).toFixed(1)},${yAt(0).toFixed(1)} Z`;
+
+      // Dots only on days that actually had a recorded snapshot (>0 or explicit history)
+      let dots = '';
+      days.forEach((p, i) => {
+        if (byDate[p.date] == null) return;
+        dots += `<circle cx="${xAt(i).toFixed(1)}" cy="${yAt(p.v).toFixed(1)}" r="3.5" fill="${stroke}" stroke="#fff" stroke-width="1.5"/>`;
+      });
+
+      const axis =
+        `<line x1="${padL}" y1="${yAt(0).toFixed(1)}" x2="${(w - padR).toFixed(1)}" y2="${yAt(0).toFixed(1)}" stroke="#94a3b8" stroke-width="1.5"/>` +
+        `<line x1="${padL}" y1="${padT}" x2="${padL}" y2="${yAt(0).toFixed(1)}" stroke="#94a3b8" stroke-width="1.5"/>`;
+
+      // Subtle marks at start / mid / end of 30-day window (no date clutter)
+      const markers = [0, 14, 29].map(i => {
+        const x = xAt(i);
+        return `<line x1="${x.toFixed(1)}" y1="${yAt(0).toFixed(1)}" x2="${x.toFixed(1)}" y2="${(yAt(0) + 4).toFixed(1)}" stroke="#94a3b8" stroke-width="1"/>`;
+      }).join('');
+
       return `<div class="home-chart-card">
-        <h3>30-day value</h3>
-        <svg class="home-chart-svg" viewBox="0 0 ${w} ${h}" preserveAspectRatio="none">
-          ${ownedPath ? `<path d="${ownedPath}" fill="none" stroke="var(--accent)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>` : ''}
-          ${watchPath ? `<path d="${watchPath}" fill="none" stroke="#6b7280" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>` : ''}
-          <text x="${padL}" y="${h - 6}" font-size="9" fill="#94a3b8">${fmtD(first)}</text>
-          <text x="${w - padR}" y="${h - 6}" font-size="9" fill="#94a3b8" text-anchor="end">${fmtD(last)}</text>
+        <h3>${gameLabel} · ${kindLabel}</h3>
+        <p class="home-chart-sub">Last 30 days · market total (${state.currency || 'USD'})</p>
+        <svg class="home-chart-svg" viewBox="0 0 ${w} ${h}" preserveAspectRatio="xMidYMid meet">
+          ${grid}
+          ${axis}
+          ${markers}
+          <path d="${areaD}" fill="${fill}" stroke="none"/>
+          <path d="${lineD}" fill="none" stroke="${stroke}" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+          ${dots}
         </svg>
-        <div class="home-chart-legend">${legend.join('')}</div>
       </div>`;
     }
     function setHomeListKind(kind) {
@@ -2168,8 +2263,80 @@ service cloud.firestore {
       el.classList.add('show');
       setTimeout(() => el.classList.remove('show'), 2800);
     }
-    function openModal(id) { document.getElementById(id).classList.add('open'); }
-    function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+    // Modal history stack so Android back closes overlay instead of leaving the app
+    const modalHistoryStack = [];
+    function openModal(id) {
+      const el = document.getElementById(id);
+      if (!el) return;
+      const alreadyOpen = el.classList.contains('open');
+      el.classList.add('open');
+      if (!alreadyOpen) {
+        try {
+          history.pushState({ cardvaultModal: id }, '');
+          modalHistoryStack.push(id);
+        } catch (e) {}
+      }
+    }
+    let ignoreNextPopstate = false;
+    function closeModal(id, fromPopstate) {
+      const el = document.getElementById(id);
+      if (el) el.classList.remove('open');
+      if (id === 'cardModal') {
+        state.editingItemId = null;
+        state.pendingCard = null;
+      }
+      if (!fromPopstate) {
+        try {
+          if (modalHistoryStack.length && modalHistoryStack[modalHistoryStack.length - 1] === id) {
+            modalHistoryStack.pop();
+            ignoreNextPopstate = true;
+            history.back(); // sync browser stack
+          }
+        } catch (e) {}
+      } else {
+        const i = modalHistoryStack.lastIndexOf(id);
+        if (i >= 0) modalHistoryStack.splice(i, 1);
+      }
+    }
+    function closeTopOverlay() {
+      // Priority: card sheet → other modals → settings → sort panel
+      const card = document.getElementById('cardModal');
+      if (card && card.classList.contains('open')) {
+        closeModal('cardModal', true);
+        return true;
+      }
+      const modalIds = ['bulkModal', 'authModal', 'folderModal', 'pasteModal'];
+      for (const mid of modalIds) {
+        const m = document.getElementById(mid);
+        if (m && m.classList.contains('open')) {
+          closeModal(mid, true);
+          return true;
+        }
+      }
+      const settings = document.getElementById('settingsPanel');
+      if (settings && settings.classList.contains('open')) {
+        closeSettings();
+        return true;
+      }
+      const sort = document.getElementById('sortPanel');
+      if (sort && sort.classList.contains('open')) {
+        closeSortPanel();
+        return true;
+      }
+      // Folder drill-down: back to home
+      if (state.tab === 'collection' || state.tab === 'watch') {
+        goHome();
+        return true;
+      }
+      return false;
+    }
+    window.addEventListener('popstate', (e) => {
+      if (ignoreNextPopstate) {
+        ignoreNextPopstate = false;
+        return;
+      }
+      closeTopOverlay();
+    });
     function escapeHtml(s) {
       if (!s) return '';
       return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
@@ -2186,12 +2353,38 @@ service cloud.firestore {
       if (state.currency === 'CAD') return displayAmount / state.usdCadRate;
       return displayAmount;
     }
+
+    /** Market USD for a card/item given its finish — used as default "price paid" when blank */
+    function marketUsdForCard(c, finish) {
+      if (!c) return null;
+      const f = finish || finishFromItem(c) || c.finish || 'nonfoil';
+      const m = priceForFinish(c, f);
+      return (m != null && !isNaN(m)) ? Number(m) : null;
+    }
+    /**
+     * Resolve purchase price in USD.
+     * - If user entered a paid amount → use that (converted from display currency)
+     * - If blank → default to market value on the day added (collection AND watch)
+     * - If market unknown → null
+     */
+    function resolvePurchasePriceUsd(paidRaw, card, finish, { isWatch } = {}) {
+      if (paidRaw !== '' && paidRaw != null && !isNaN(parseFloat(paidRaw))) {
+        return toUsd(parseFloat(paidRaw));
+      }
+      // Default to current market (USD) so gain/loss tracks from day-one
+      return marketUsdForCard(card, finish);
+    }
     function fmtMoney(n, alreadyInDisplayCurrency = false) {
       if (n == null || isNaN(n)) return '—';
       const val = alreadyInDisplayCurrency ? Number(n) : fromUsd(Number(n));
       if (val == null || isNaN(val)) return '—';
       const symbol = state.currency === 'CAD' ? 'CA$' : '$';
-      return symbol + val.toFixed(2);
+      // e.g. $1,000.00
+      const formatted = val.toLocaleString('en-US', {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
+      });
+      return symbol + formatted;
     }
     function toggleCurrency() {
       state.currency = state.currency === 'CAD' ? 'USD' : 'CAD';
@@ -2800,8 +2993,13 @@ service cloud.firestore {
       }
       return { qty, market, paid, hasM, hasP, entries: items.length };
     }
-    function kindTotals(kind) {
-      const folders = foldersOfKind(kind);
+    function kindTotals(kind, gameOverride) {
+      const g = gameOverride || state.game || 'mtg';
+      // foldersOfKind filters by state.game; when override set, filter manually
+      const folders = (gameOverride
+        ? state.folders.filter(f => folderKind(f) === kind && folderGame(f) === g)
+            .sort((a, b) => (a.sortOrder || 0) - (b.sortOrder || 0))
+        : foldersOfKind(kind));
       let qty = 0, market = 0, paid = 0, hasM = false, hasP = false;
       for (const f of folders) {
         const t = folderTotals(f.id);
@@ -3544,11 +3742,12 @@ service cloud.firestore {
         const paidEl = document.querySelector(`.bulk-paid[data-idx="${idx}"]`);
         const quantity = Math.max(1, parseInt(qtyEl?.value) || 1);
         const paidRaw = paidEl?.value;
-        const purchasePrice = watch || !paidRaw ? null : toUsd(parseFloat(paidRaw));
         const cardGame = c.game || state.game || 'mtg';
         // Pokémon: each printing is already a unique scryfallId (…::variant); keep its finish
         const itemFinish = cardGame === 'pokemon' ? (c.finish || c.variantKey || 'normal') : finish;
         const itemFoil = cardGame === 'pokemon' ? itemFinish !== 'normal' : foil;
+        // Blank paid → market value on day added (collection or watch)
+        const purchasePrice = resolvePurchasePriceUsd(paidRaw, c, itemFinish, { isWatch: watch });
         const existing = state.items.find(i =>
           i.scryfallId === c.scryfallId && i.folderId === folderId && finishFromItem(i) === itemFinish
         );
@@ -3748,8 +3947,6 @@ service cloud.firestore {
       const quantity = parseInt(document.getElementById('modalQty').value) || 1;
       const folderIdForPaid = document.getElementById('modalFolder').value;
       const paidRaw = document.getElementById('modalPaid').value;
-      // User types in active currency; store as USD — never for watch list
-      const purchasePrice = isWatchFolder(folderIdForPaid) || paidRaw === '' ? null : toUsd(parseFloat(paidRaw));
       let finish = document.getElementById('modalFoil').value || 'nonfoil';
       const condition = document.getElementById('modalCondition').value;
       // Resolve game from edited item or pending card
@@ -3757,6 +3954,13 @@ service cloud.firestore {
         ? state.items.find(i => i.id === state.editingItemId)
         : state.pendingCard;
       const game = (ref && ref.game) || state.game || 'mtg';
+      // Blank paid → market on day added; explicit paid uses typed value
+      const purchasePrice = resolvePurchasePriceUsd(
+        paidRaw,
+        ref,
+        (game === 'pokemon' && (finish === 'nonfoil' || !finish)) ? 'normal' : finish,
+        { isWatch: isWatchFolder(folderIdForPaid) }
+      );
       if (game === 'pokemon' && (finish === 'nonfoil' || !finish)) finish = 'normal';
       const foil = game === 'pokemon'
         ? (finish !== 'normal' && finish !== 'nonfoil')
