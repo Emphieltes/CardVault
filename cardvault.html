@@ -734,7 +734,41 @@
       font-size: 0.7rem;
       color: var(--text-dim);
       line-height: 1.35;
-      margin-top: auto;
+      margin-top: 8px;
+    }
+    .settings-section {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      margin-top: 12px;
+    }
+    .settings-section:first-of-type { margin-top: 8px; }
+    .settings-section-label {
+      font-size: 0.68rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--text-dim);
+      margin: 0 0 2px;
+    }
+    .settings-toggle {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      font-size: 0.8rem;
+      color: var(--text);
+      padding: 8px 10px;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      background: var(--surface2);
+    }
+    .settings-toggle input[type="checkbox"] {
+      width: 18px;
+      height: 18px;
+      accent-color: var(--accent);
+      cursor: pointer;
+      flex-shrink: 0;
     }
 
     main { padding: 8px; max-width: 1280px; margin: 0 auto; }
@@ -1373,18 +1407,31 @@
   <aside class="settings-panel" id="settingsPanel">
     <h3>Settings</h3>
     <p class="auth-status" id="authStatus"><span class="sync-dot" id="syncDot"></span>Not signed in</p>
-    <div class="settings-item" onclick="toggleCurrency()">Currency: <strong id="settingsCurrencyLabel">CAD</strong></div>
-    <div class="settings-toggle" onclick="event.stopPropagation()">
-      <span>Collection chart</span>
-      <input type="checkbox" id="toggleChartOwned" checked onchange="toggleChartPref('owned', this.checked)" />
+
+    <div class="settings-section">
+      <div class="settings-section-label">General</div>
+      <div class="settings-item" onclick="toggleCurrency()">Currency: <strong id="settingsCurrencyLabel">CAD</strong></div>
     </div>
-    <div class="settings-toggle" onclick="event.stopPropagation()">
-      <span>Watch list chart</span>
-      <input type="checkbox" id="toggleChartWatch" checked onchange="toggleChartPref('watch', this.checked)" />
+
+    <div class="settings-section">
+      <div class="settings-section-label">Home charts</div>
+      <div class="settings-toggle" onclick="event.stopPropagation()">
+        <span>Show collection chart</span>
+        <input type="checkbox" id="toggleChartOwned" checked onchange="toggleChartPref('owned', this.checked)" />
+      </div>
+      <div class="settings-toggle" onclick="event.stopPropagation()">
+        <span>Show watch list chart</span>
+        <input type="checkbox" id="toggleChartWatch" checked onchange="toggleChartPref('watch', this.checked)" />
+      </div>
+      <p class="settings-note" style="margin-top:0">Turn these off to hide the 30-day market graph on Home. Snapshots still save when you open the app.</p>
     </div>
-    <div class="settings-item" onclick="document.getElementById('csvInput').click(); closeSettings();">Import CSV</div>
-    <div class="settings-item" onclick="exportCSV(); closeSettings();">Export CSV</div>
-    <p class="settings-note">Price chart builds daily snapshots when you open CardVault (up to 30 days). Sign in to sync across devices.</p>
+
+    <div class="settings-section">
+      <div class="settings-section-label">Data</div>
+      <div class="settings-item" onclick="document.getElementById('csvInput').click(); closeSettings();">Import CSV</div>
+      <div class="settings-item" onclick="exportCSV(); closeSettings();">Export CSV</div>
+    </div>
+
     <button type="button" class="settings-signout" id="settingsSignOutBtn" onclick="cloudSignOut()" disabled>Sign out</button>
   </aside>
 
