@@ -172,6 +172,61 @@
     .variant-badge.holo { background: #fce7f3; color: #be185d; }
     .variant-badge.pokeball { background: #fee2e2; color: #b91c1c; }
     .variant-badge.masterball { background: #ede9fe; color: #6d28d9; }
+    .variant-badge.pro {
+      background: #e0e7ff;
+      color: #3730a3;
+      border: 1px solid #a5b4fc;
+    }
+    .variant-badge.ch {
+      background: #ecfeff;
+      color: #0e7490;
+      border: 1px solid #67e8f9;
+    }
+    .variant-badge.exp {
+      background: #fef3c7;
+      color: #92400e;
+      border: 1px solid #f59e0b;
+    }
+    .variant-badge.exc {
+      background: #fef3c7;
+      color: #92400e;
+      border: 1px solid #f59e0b;
+    }
+    .variant-badge.stamp {
+      background: #fef3c7;
+      color: #92400e;
+      border: 1px solid #f59e0b;
+    }
+    /* Ribbon on card image when stamp exclusive */
+    .card-art-wrap { position: relative; }
+    .stamp-ribbon {
+      position: absolute;
+      top: 6px;
+      left: 6px;
+      right: 6px;
+      z-index: 3;
+      pointer-events: none;
+      display: flex;
+      justify-content: flex-start;
+    }
+    .stamp-ribbon span {
+      display: inline-block;
+      max-width: 100%;
+      background: rgba(15, 15, 20, 0.82);
+      color: #fde68a;
+      font-size: 0.58rem;
+      font-weight: 800;
+      letter-spacing: 0.02em;
+      text-transform: uppercase;
+      padding: 3px 6px;
+      border-radius: 6px;
+      border: 1px solid rgba(245, 158, 11, 0.65);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      backdrop-filter: blur(4px);
+      -webkit-backdrop-filter: blur(4px);
+    }
     .set-bulk-actions {
       display: flex;
       flex-wrap: wrap;
@@ -929,6 +984,7 @@
       z-index: 2;
     }
     .foil-pip {
+      white-space: nowrap;
       width: 18px;
       height: 18px;
       border-radius: 50%;
@@ -960,6 +1016,34 @@
       letter-spacing: -0.04em;
       background: #fee2e2;
       color: #b91c1c;
+    }
+    .foil-pip.pro {
+      background: #e0e7ff;
+      color: #3730a3;
+      border: 1px solid #6366f1;
+      font-size: 0.55rem;
+    }
+    .foil-pip.ch {
+      background: #ecfeff;
+      color: #0e7490;
+      border: 1px solid #06b6d4;
+      font-size: 0.55rem;
+    }
+    .foil-pip.exp {
+      background: #fef3c7;
+      color: #92400e;
+      border: 1px solid #f59e0b;
+      font-size: 0.58rem;
+      letter-spacing: -0.02em;
+      padding: 2px 5px;
+      min-width: 1.35rem;
+      white-space: nowrap;
+    }
+    .foil-pip.exc {
+      background: #fef3c7;
+      color: #92400e;
+      border: 1px solid #f59e0b;
+      font-size: 0.55rem;
     }
     .foil-pip.mb {
       font-size: 0.52rem;
@@ -1016,11 +1100,15 @@
     }
 
     .check {
-      position: absolute; top: 6px; left: 6px; width: 22px; height: 22px; border-radius: 6px;
+      position: absolute; top: 6px; left: 6px; width: 26px; height: 26px; border-radius: 8px;
       background: rgba(0,0,0,0.55); border: 2px solid white; display: flex; align-items: center;
-      justify-content: center; font-size: 0.75rem; color: white; opacity: 0; z-index: 3;
+      justify-content: center; font-size: 0.75rem; color: white; opacity: 0.92; z-index: 4;
+      cursor: pointer; box-shadow: 0 1px 4px rgba(0,0,0,0.35);
+      transition: background 0.12s, border-color 0.12s, transform 0.12s;
     }
+    .check:hover { transform: scale(1.06); }
     .card.selected .check { opacity: 1; background: var(--accent); border-color: var(--accent); }
+    .card.browse-card { cursor: pointer; }
 
     .set-list { display: flex; flex-direction: column; gap: 4px; }
     .set-row {
@@ -2104,6 +2192,7 @@ service cloud.firestore {
       } catch (e) {}
       saveState();
       updateCurrencyButton();
+      try { refreshEurUsdRate(); } catch (e) {}
       updateChartToggles();
     }
     function saveState() {
@@ -2628,42 +2717,105 @@ service cloud.firestore {
     const PKMN_API = 'https://api.tcgdex.net/v2/en';
     // Offline/cors fallback when live TCGdex fetch fails in the browser
     const PKMN_SETS_FALLBACK = [{"code":"me05","name":"Pitch Black","card_count":120,"released_at":""},{"code":"me04","name":"Chaos Rising","card_count":122,"released_at":""},{"code":"me03","name":"Perfect Order","card_count":124,"released_at":""},{"code":"B2a","name":"Paldean Wonders","card_count":131,"released_at":""},{"code":"me02.5","name":"Ascended Heroes","card_count":295,"released_at":""},{"code":"B2","name":"Fantastical Parade","card_count":234,"released_at":""},{"code":"B1a","name":"Crimson Blaze","card_count":103,"released_at":""},{"code":"me02","name":"Phantasmal Flames","card_count":130,"released_at":""},{"code":"B1","name":"Mega Rising","card_count":331,"released_at":""},{"code":"mep","name":"MEP Black Star Promos","card_count":89,"released_at":""},{"code":"me01","name":"Mega Evolution","card_count":188,"released_at":""},{"code":"mee","name":"Mega Evolution Energy","card_count":8,"released_at":""},{"code":"A4a","name":"Secluded Springs","card_count":105,"released_at":""},{"code":"A4","name":"Wisdom of Sea and Sky","card_count":241,"released_at":""},{"code":"sv10.5b","name":"Black Bolt","card_count":172,"released_at":""},{"code":"sv10.5w","name":"White Flare","card_count":173,"released_at":""},{"code":"A3b","name":"Eevee Grove","card_count":107,"released_at":""},{"code":"sv10","name":"Destined Rivals","card_count":244,"released_at":""},{"code":"A3a","name":"Extradimensional Crisis","card_count":103,"released_at":""},{"code":"A3","name":"Celestial Guardians","card_count":239,"released_at":""},{"code":"sv09","name":"Journey Together","card_count":190,"released_at":""},{"code":"A2b","name":"Shining Revelry","card_count":111,"released_at":""},{"code":"A2a","name":"Triumphant Light","card_count":96,"released_at":""},{"code":"A2","name":"Space-Time Smackdown","card_count":207,"released_at":""},{"code":"sv08.5","name":"Prismatic Evolutions","card_count":180,"released_at":""},{"code":"A1a","name":"Mythical Island","card_count":86,"released_at":""},{"code":"2024sv","name":"McDonald's Collection 2024","card_count":15,"released_at":""},{"code":"sv08","name":"Surging Sparks","card_count":252,"released_at":""},{"code":"P-A","name":"Promos-A","card_count":100,"released_at":""},{"code":"A1","name":"Genetic Apex","card_count":286,"released_at":""},{"code":"sv07","name":"Stellar Crown","card_count":175,"released_at":""},{"code":"sv06.5","name":"Shrouded Fable","card_count":99,"released_at":""},{"code":"sv06","name":"Twilight Masquerade","card_count":226,"released_at":""},{"code":"sv05","name":"Temporal Forces","card_count":218,"released_at":""},{"code":"sv04.5","name":"Paldean Fates","card_count":245,"released_at":""},{"code":"sv04","name":"Paradox Rift","card_count":266,"released_at":""},{"code":"mfb","name":"My First Battle","card_count":48,"released_at":""},{"code":"sv03.5","name":"151","card_count":207,"released_at":""},{"code":"sv03","name":"Obsidian Flames","card_count":230,"released_at":""},{"code":"2023sv","name":"McDonald's Collection 2023","card_count":15,"released_at":""},{"code":"sv02","name":"Paldea Evolved","card_count":279,"released_at":""},{"code":"sve","name":"Scarlet & Violet Energy","card_count":24,"released_at":""},{"code":"svp","name":"SVP Black Star Promos","card_count":226,"released_at":""},{"code":"sv01","name":"Scarlet & Violet","card_count":258,"released_at":""},{"code":"swsh12.5","name":"Crown Zenith","card_count":160,"released_at":""},{"code":"swsh12.5gg","name":"Crown Zenith Galarian Gallery","card_count":70,"released_at":""},{"code":"swsh12tg","name":"Silver Tempest Trainer Gallery","card_count":30,"released_at":""},{"code":"swsh12","name":"Silver Tempest","card_count":215,"released_at":""},{"code":"swsh11tg","name":"Lost Origin Trainer Gallery","card_count":30,"released_at":""},{"code":"swsh11","name":"Lost Origin","card_count":217,"released_at":""},{"code":"2022swsh","name":"McDonald's Collection 2022","card_count":15,"released_at":""},{"code":"swsh10.5","name":"Pok\u00e9mon GO","card_count":88,"released_at":""},{"code":"swsh10tg","name":"Astral Radiance Trainer Gallery","card_count":30,"released_at":""},{"code":"swsh10","name":"Astral Radiance","card_count":216,"released_at":""},{"code":"swsh9tg","name":"Brilliant Stars Trainer Gallery","card_count":30,"released_at":""},{"code":"swsh9","name":"Brilliant Stars","card_count":186,"released_at":""},{"code":"swsh8","name":"Fusion Strike","card_count":284,"released_at":""},{"code":"cel25cc","name":"Celebrations Classic Collection","card_count":25,"released_at":""},{"code":"cel25","name":"Celebrations","card_count":25,"released_at":""},{"code":"swsh7","name":"Evolving Skies","card_count":237,"released_at":""},{"code":"swsh6","name":"Chilling Reign","card_count":233,"released_at":""},{"code":"swsh5","name":"Battle Styles","card_count":183,"released_at":""},{"code":"swsh4.5sv","name":"Shining Fates Shiny Vault","card_count":122,"released_at":""},{"code":"swsh4.5","name":"Shining Fates","card_count":73,"released_at":""},{"code":"2021swsh","name":"McDonald's Collection 2021","card_count":25,"released_at":""},{"code":"swsh4","name":"Vivid Voltage","card_count":203,"released_at":""},{"code":"swsh3.5","name":"Champion's Path","card_count":80,"released_at":""},{"code":"fut2020","name":"Pok\u00e9mon Futsal 2020","card_count":5,"released_at":""},{"code":"swsh3","name":"Darkness Ablaze","card_count":201,"released_at":""},{"code":"swsh2","name":"Rebel Clash","card_count":209,"released_at":""},{"code":"swsh1","name":"Sword & Shield","card_count":216,"released_at":""},{"code":"swshp","name":"SWSH Black Star Promos","card_count":307,"released_at":""},{"code":"sm12","name":"Cosmic Eclipse","card_count":271,"released_at":""},{"code":"2019sm","name":"McDonald's Collection 2019","card_count":12,"released_at":""},{"code":"sm115","name":"Hidden Fates","card_count":69,"released_at":""},{"code":"sma","name":"Hidden Fates Shiny Vault","card_count":94,"released_at":""},{"code":"sm11","name":"Unified Minds","card_count":258,"released_at":""},{"code":"sm10","name":"Unbroken Bonds","card_count":234,"released_at":""},{"code":"det1","name":"Detective Pikachu","card_count":18,"released_at":""},{"code":"sm9","name":"Team Up","card_count":196,"released_at":""},{"code":"sm8","name":"Lost Thunder","card_count":236,"released_at":""},{"code":"2018sm","name":"McDonald's Collection 2018","card_count":12,"released_at":""},{"code":"sm7.5","name":"Dragon Majesty","card_count":78,"released_at":""},{"code":"sm7","name":"Celestial Storm","card_count":183,"released_at":""},{"code":"sm6","name":"Forbidden Light","card_count":146,"released_at":""},{"code":"sm5","name":"Ultra Prism","card_count":173,"released_at":""},{"code":"sm4","name":"Crimson Invasion","card_count":125,"released_at":""},{"code":"sm3.5","name":"Shining Legends","card_count":78,"released_at":""},{"code":"sm3","name":"Burning Shadows","card_count":169,"released_at":""},{"code":"2017sm","name":"McDonald's Collection 2017","card_count":12,"released_at":""},{"code":"sm2","name":"Guardians Rising","card_count":169,"released_at":""},{"code":"tk-sm-r","name":"SM trainer Kit (Alolan Raichu)","card_count":30,"released_at":""},{"code":"tk-sm-l","name":"SM trainer Kit (Lycanroc)","card_count":30,"released_at":""},{"code":"sm1","name":"Sun & Moon","card_count":172,"released_at":""},{"code":"smp","name":"SM Black Star Promos","card_count":248,"released_at":""},{"code":"xy12","name":"Evolutions","card_count":113,"released_at":""},{"code":"2016xy","name":"McDonald's Collection 2016","card_count":12,"released_at":""},{"code":"xy11","name":"Steam Siege","card_count":116,"released_at":""},{"code":"xy10","name":"Fates Collide","card_count":129,"released_at":""},{"code":"tk-xy-p","name":"XY trainer Kit (Pikachu Libre)","card_count":30,"released_at":""},{"code":"tk-xy-su","name":"XY trainer Kit (Suicune)","card_count":30,"released_at":""},{"code":"g1","name":"Generations","card_count":117,"released_at":""},{"code":"xy9","name":"BREAKpoint","card_count":126,"released_at":""},{"code":"2015xy","name":"McDonald's Collection 2015","card_count":12,"released_at":""},{"code":"xy8","name":"BREAKthrough","card_count":165,"released_at":""},{"code":"xy7","name":"Ancient Origins","card_count":101,"released_at":""},{"code":"xy6","name":"Roaring Skies","card_count":112,"released_at":""},{"code":"tk-xy-latio","name":"XY trainer Kit (Latios)","card_count":30,"released_at":""},{"code":"tk-xy-latia","name":"XY trainer Kit (Latias)","card_count":30,"released_at":""},{"code":"dc1","name":"Double Crisis","card_count":34,"released_at":""},{"code":"xy5","name":"Primal Clash","card_count":164,"released_at":""},{"code":"xy4","name":"Phantom Forces","card_count":124,"released_at":""},{"code":"tk-xy-b","name":"XY trainer Kit (Bisharp)","card_count":30,"released_at":""},{"code":"tk-xy-w","name":"XY trainer Kit (Wigglytuff)","card_count":30,"released_at":""},{"code":"xy3","name":"Furious Fists","card_count":114,"released_at":""},{"code":"2014xy","name":"McDonald's Collection 2014","card_count":12,"released_at":""},{"code":"xy2","name":"Flashfire","card_count":110,"released_at":""},{"code":"tk-xy-n","name":"XY trainer Kit (Noivern)","card_count":30,"released_at":""},{"code":"tk-xy-sy","name":"XY trainer Kit (Sylveon)","card_count":30,"released_at":""},{"code":"xya","name":"Yellow A Alternate","card_count":6,"released_at":""},{"code":"xy1","name":"XY","card_count":146,"released_at":""},{"code":"xy0","name":"Kalos Starter Set","card_count":39,"released_at":""},{"code":"rc","name":"Radiant Collection","card_count":25,"released_at":""},{"code":"bw11","name":"Legendary Treasures","card_count":140,"released_at":""},{"code":"xyp","name":"XY Black Star Promos","card_count":216,"released_at":""},{"code":"bw10","name":"Plasma Blast","card_count":105,"released_at":""},{"code":"bw9","name":"Plasma Freeze","card_count":122,"released_at":""},{"code":"bw8","name":"Plasma Storm","card_count":138,"released_at":""},{"code":"bw7","name":"Boundaries Crossed","card_count":153,"released_at":""},{"code":"dv1","name":"Dragon Vault","card_count":21,"released_at":""},{"code":"bw6","name":"Dragons Exalted","card_count":128,"released_at":""},{"code":"2012bw","name":"McDonald's Collection 2012","card_count":12,"released_at":""},{"code":"bw5","name":"Dark Explorers","card_count":111,"released_at":""},{"code":"bw4","name":"Next Destinies","card_count":103,"released_at":""},{"code":"bw3","name":"Noble Victories","card_count":102,"released_at":""},{"code":"tk-bw-z","name":"BW trainer Kit (Zoroark)","card_count":30,"released_at":""},{"code":"tk-bw-e","name":"BW trainer Kit (Excadrill)","card_count":30,"released_at":""},{"code":"bw2","name":"Emerging Powers","card_count":98,"released_at":""},{"code":"2011bw","name":"McDonald's Collection 2011","card_count":12,"released_at":""},{"code":"bwp","name":"BW Black Star Promos","card_count":101,"released_at":""},{"code":"bw1","name":"Black & White","card_count":115,"released_at":""},{"code":"col1","name":"Call of Legends","card_count":106,"released_at":""},{"code":"hgss4","name":"Triumphant","card_count":103,"released_at":""},{"code":"hgss3","name":"Undaunted","card_count":91,"released_at":""},{"code":"hgss2","name":"Unleashed","card_count":96,"released_at":""},{"code":"tk-hs-g","name":"HS trainer Kit (Gyarados)","card_count":30,"released_at":""},{"code":"tk-hs-r","name":"HS trainer Kit (Raichu)","card_count":30,"released_at":""},{"code":"hgssp","name":"HGSS Black Star Promos","card_count":25,"released_at":""},{"code":"hgss1","name":"HeartGold SoulSilver","card_count":124,"released_at":""},{"code":"ru1","name":"Pok\u00e9mon Rumble","card_count":16,"released_at":""},{"code":"pl4","name":"Arceus","card_count":111,"released_at":""},{"code":"pl3","name":"Supreme Victors","card_count":153,"released_at":""},{"code":"pl2","name":"Rising Rivals","card_count":120,"released_at":""},{"code":"pop9","name":"POP Series 9","card_count":17,"released_at":""},{"code":"pl1","name":"Platinum","card_count":133,"released_at":""},{"code":"dp7","name":"Stormfront","card_count":106,"released_at":""},{"code":"pop8","name":"POP Series 8","card_count":17,"released_at":""},{"code":"dp6","name":"Legends Awakened","card_count":146,"released_at":""},{"code":"dp5","name":"Majestic Dawn","card_count":100,"released_at":""},{"code":"pop7","name":"POP Series 7","card_count":17,"released_at":""},{"code":"dp4","name":"Great Encounters","card_count":106,"released_at":""},{"code":"dp3","name":"Secret Wonders","card_count":132,"released_at":""},{"code":"pop6","name":"POP Series 6","card_count":17,"released_at":""},{"code":"tk-dp-m","name":"DP trainer Kit (Manaphy)","card_count":12,"released_at":""},{"code":"tk-dp-l","name":"DP trainer Kit (Lucario)","card_count":11,"released_at":""},{"code":"dp2","name":"Mysterious Treasures","card_count":124,"released_at":""},{"code":"dp1","name":"Diamond & Pearl","card_count":130,"released_at":""},{"code":"dpp","name":"DP Black Star Promos","card_count":56,"released_at":""},{"code":"pop5","name":"POP Series 5","card_count":17,"released_at":""},{"code":"ex16","name":"Power Keepers","card_count":108,"released_at":""},{"code":"ex15","name":"Dragon Frontiers","card_count":101,"released_at":""},{"code":"ex14","name":"Crystal Guardians","card_count":100,"released_at":""},{"code":"pop4","name":"POP Series 4","card_count":17,"released_at":""},{"code":"ex13","name":"Holon Phantoms","card_count":111,"released_at":""},{"code":"pop3","name":"POP Series 3","card_count":17,"released_at":""},{"code":"tk-ex-p","name":"EX trainer Kit 2 (Plusle)","card_count":12,"released_at":""},{"code":"tk-ex-m","name":"EX trainer Kit 2 (Minun)","card_count":12,"released_at":""},{"code":"ex12","name":"Legend Maker","card_count":93,"released_at":""},{"code":"ex11","name":"Delta Species","card_count":114,"released_at":""},{"code":"exu","name":"Unseen Forces Unown Collection","card_count":28,"released_at":""},{"code":"ex10","name":"Unseen Forces","card_count":117,"released_at":""},{"code":"pop2","name":"POP Series 2","card_count":17,"released_at":""},{"code":"ex9","name":"Emerald","card_count":107,"released_at":""},{"code":"ex8","name":"Deoxys","card_count":108,"released_at":""},{"code":"ex7","name":"Team Rocket Returns","card_count":111,"released_at":""},{"code":"pop1","name":"POP Series 1","card_count":17,"released_at":""},{"code":"ex6","name":"FireRed & LeafGreen","card_count":116,"released_at":""},{"code":"tk-ex-latio","name":"EX trainer Kit (Latios)","card_count":10,"released_at":""},{"code":"tk-ex-latia","name":"EX trainer Kit (Latias)","card_count":10,"released_at":""},{"code":"ex5.5","name":"Pok\u00e9 Card Creator Pack","card_count":5,"released_at":""},{"code":"ex5","name":"Hidden Legends","card_count":102,"released_at":""},{"code":"ex4","name":"Team Magma vs Team Aqua","card_count":97,"released_at":""},{"code":"ex3","name":"Dragon","card_count":100,"released_at":""},{"code":"np","name":"Nintendo Black Star Promos","card_count":40,"released_at":""},{"code":"ex2","name":"Sandstorm","card_count":100,"released_at":""},{"code":"ex1","name":"Ruby & Sapphire","card_count":109,"released_at":""},{"code":"ecard3","name":"Skyridge","card_count":182,"released_at":""},{"code":"ecard2","name":"Aquapolis","card_count":186,"released_at":""},{"code":"bog","name":"Best of game","card_count":9,"released_at":""},{"code":"ecard1","name":"Expedition Base Set","card_count":165,"released_at":""},{"code":"sp","name":"Sample","card_count":10,"released_at":""},{"code":"lc","name":"Legendary Collection","card_count":110,"released_at":""},{"code":"neo4","name":"Neo Destiny","card_count":113,"released_at":""},{"code":"neo3","name":"Neo Revelation","card_count":66,"released_at":""},{"code":"si1","name":"Southern Islands","card_count":18,"released_at":""},{"code":"neo2","name":"Neo Discovery","card_count":75,"released_at":""},{"code":"neo1","name":"Neo Genesis","card_count":111,"released_at":""},{"code":"gym2","name":"Gym Challenge","card_count":132,"released_at":""},{"code":"gym1","name":"Gym Heroes","card_count":132,"released_at":""},{"code":"base5","name":"Team Rocket","card_count":83,"released_at":""},{"code":"base4","name":"Base Set 2","card_count":130,"released_at":""},{"code":"jumbo","name":"Jumbo cards","card_count":160,"released_at":""},{"code":"base3","name":"Fossil","card_count":62,"released_at":""},{"code":"wp","name":"W Promotional","card_count":7,"released_at":""},{"code":"basep","name":"Wizards Black Star Promos","card_count":53,"released_at":""},{"code":"base2","name":"Jungle","card_count":64,"released_at":""},{"code":"base1","name":"Base Set","card_count":102,"released_at":""},{"code":"miscp","name":"Miscellaneous Promos","card_count":1,"released_at":""}];
+    // Finishes: Normal, RH, Holo, Poké Ball, Master Ball, Cosmos Holo (CH), Promo (Pro), Exclusive Promo (Ex-P)
+    // Internal keys still carry stamp ids so PC vs GameStop stay separate items.
     const VARIANT_LABELS = {
       'normal': 'Normal',
       'holo': 'Holo',
       'reverse': 'Reverse Holo',
       'reverse::pokeball': 'Poké Ball',
       'reverse::masterball': 'Master Ball',
-      'holo::pokeball': 'Holo Poké Ball',
-      'holo::masterball': 'Holo Master Ball',
+      'holo::pokeball': 'Poké Ball',
+      'holo::masterball': 'Master Ball',
       'holo::cosmos': 'Cosmos Holo',
-      'firstEdition': '1st Edition'
+      'reverse::cosmos': 'Cosmos Holo',
+      'cosmos': 'Cosmos Holo',
+      'promo': 'Promo',
+      'exclusive': 'Exclusive Promo',
+      'exclusive-promo': 'Exclusive Promo'
     };
-    function variantKey(type, foil) {
-      if (foil) return `${type}::${foil}`;
-      return type || 'normal';
+    function isCosmosFinish(key) {
+      const k = String(key || '').toLowerCase();
+      return k.includes('cosmos');
+    }
+    function isPromoFinish(key) {
+      const k = String(key || '').toLowerCase();
+      if (isExclusivePromoFinish(k)) return false;
+      return k === 'promo' || k.startsWith('promo::');
+    }
+    function isExclusivePromoFinish(key) {
+      const k = String(key || '').toLowerCase();
+      if (k.includes('stamp:')) return true;
+      if (k === 'exclusive' || k === 'exclusive-promo' || k.startsWith('exclusive')) return true;
+      if (k.includes('firstedition') || k.includes('first-edition')) return true;
+      return false;
+    }
+    /** @deprecated alias — stamps / exclusives */
+    function isExclusiveFinish(key) {
+      return isExclusivePromoFinish(key) || isCosmosFinish(key);
+    }
+    /** Black Star / promo sets — usually one printing (+ rare stamp exclusives) */
+    function isPromoSetId(setId, setName, rarity) {
+      const s = String(setId || '').toLowerCase();
+      const n = String(setName || '').toLowerCase();
+      const r = String(rarity || '').toLowerCase();
+      if (r === 'promo' || r.includes('promo')) return true;
+      if (n.includes('black star promo') || n.includes('promo card')) return true;
+      if (n.includes('promotional')) return true;
+      const promoIds = new Set([
+        'svp','swshp','smp','xyp','bwp','dpp','hgssp','np','basep','mep','wp','p-a','miscp'
+      ]);
+      if (promoIds.has(s)) return true;
+      return false;
+    }
+    function variantKey(type, foil, stamps) {
+      let base = type || 'normal';
+      if (foil && foil !== true) base = `${base}::${foil}`;
+      else if (foil === true && base === 'normal') base = 'holo';
+      const stampList = Array.isArray(stamps) ? stamps.filter(Boolean) : (stamps ? [stamps] : []);
+      if (stampList.length) {
+        const stampPart = stampList.slice().sort().map(s => `stamp:${String(s).toLowerCase()}`).join('+');
+        return `${base}::${stampPart}`;
+      }
+      return base;
     }
     function variantLabel(key) {
-      return VARIANT_LABELS[key] || key.replace(/::/g, ' / ');
+      const k = String(key || 'normal');
+      const low = k.toLowerCase();
+      if (isExclusivePromoFinish(low)) return 'Exclusive Promo';
+      if (isCosmosFinish(low)) return 'Cosmos Holo';
+      if (isPromoFinish(low)) return 'Promo';
+      if (VARIANT_LABELS[k]) return VARIANT_LABELS[k];
+      if (low.includes('masterball')) return 'Master Ball';
+      if (low.includes('pokeball')) return 'Poké Ball';
+      if (low === 'reverse' || (low.includes('reverse') && !low.includes('cosmos'))) return 'Reverse Holo';
+      if (low === 'holo' || low.includes('holofoil')) return 'Holo';
+      if (low === 'normal' || low === 'nonfoil') return 'Normal';
+      return 'Exclusive Promo';
     }
     function variantBadgeClass(key) {
-      if (key.includes('pokeball')) return 'pokeball';
-      if (key.includes('masterball')) return 'masterball';
-      if (key.startsWith('reverse')) return 'rh';
-      if (key.startsWith('holo')) return 'holo';
+      const k = String(key || '').toLowerCase();
+      if (isExclusivePromoFinish(k)) return 'exp stamp';
+      if (isCosmosFinish(k)) return 'ch';
+      if (isPromoFinish(k)) return 'pro';
+      if (k.includes('pokeball')) return 'pokeball';
+      if (k.includes('masterball')) return 'masterball';
+      if (k.includes('reverse')) return 'rh';
+      if (k.includes('holo')) return 'holo';
       return '';
     }
-    /** Master-set order: Normal → Reverse Holo → Poké Ball → Master Ball (then other foils) */
+    /** Order: Normal → RH → PB → MB → Holo → Cosmos → Promo → Exclusive Promo */
     function pokemonVariantRank(key) {
       const k = String(key || 'normal').toLowerCase();
+      if (isExclusivePromoFinish(k)) return 70;
+      if (isPromoFinish(k)) return 60;
+      if (isCosmosFinish(k)) return 50;
       if (k === 'normal' || k === 'nonfoil') return 0;
       if (k === 'reverse' || k === 'reverseholofoil' || k === 'reverse-holofoil') return 1;
       if (k.includes('pokeball')) return 2;
       if (k.includes('masterball')) return 3;
-      if (k === 'holo' || k === 'holofoil' || k.startsWith('holo::')) return 4;
-      if (k.includes('cosmos')) return 5;
-      if (k.includes('first')) return 6;
-      return 50;
+      if (k === 'holo' || k === 'holofoil' || k.startsWith('holo')) return 4;
+      return 40;
     }
     function pokemonCollectorNum(v) {
       const n = parseInt(String(v || '').replace(/[^\d]/g, ''), 10);
@@ -2701,9 +2853,27 @@ service cloud.firestore {
       }
       return null;
     }
+    // Cardmarket prices are EUR. Collectr/ManaBox-style trackers use TCGPlayer USD market.
+    // Convert EUR→USD with a modest rate; prefer 7-day / trend over laggy 30-day averages.
+    let stateEurUsd = 1.08;
+    function eurToUsd(eur) {
+      if (eur == null || isNaN(eur)) return null;
+      return Number(eur) * (stateEurUsd || 1.08);
+    }
+    async function refreshEurUsdRate() {
+      try {
+        const r = await fetch('https://api.frankfurter.app/latest?from=EUR&to=USD', {
+          mode: 'cors', cache: 'no-store', credentials: 'omit'
+        });
+        if (!r.ok) return;
+        const d = await r.json();
+        if (d && d.rates && d.rates.USD) stateEurUsd = Number(d.rates.USD);
+      } catch (e) {}
+    }
     function priceForPokemonVariant(detail, key) {
-      const tp = (detail?.pricing || {}).tcgplayer || {};
-      // Prefer finish-specific block
+      const pricing = detail?.pricing || {};
+      const tp = pricing.tcgplayer || {};
+      // Prefer finish-specific TCGPlayer block (USD)
       if (key.includes('reverse') || key.includes('pokeball') || key.includes('masterball')) {
         const b = tp['reverse-holofoil'] || tp['reverseHolofoil'] || tp['holofoil'];
         if (b) {
@@ -2712,7 +2882,7 @@ service cloud.firestore {
           }
         }
       }
-      if (key.startsWith('holo')) {
+      if (key.includes('holo')) {
         const b = tp['holofoil'] || tp['holo'];
         if (b) {
           for (const k of ['marketPrice', 'market', 'midPrice', 'mid']) {
@@ -2726,30 +2896,80 @@ service cloud.firestore {
           if (b[k] != null && typeof b[k] !== 'object') return Number(b[k]);
         }
       }
-      return priceFromTcgPlayerBlock(tp);
+      const fromTp = priceFromTcgPlayerBlock(tp);
+      if (fromTp != null) return fromTp;
+      // Cardmarket (EUR) fallback for stamped exclusives with no TCGPlayer price payload
+      const cm = pricing.cardmarket || {};
+      // Prefer near-term signals (closer to Collectr/TCGPlayer spot)
+      for (const k of ['avg7', 'trend', 'avg', 'avg1', 'low', 'avg30']) {
+        if (cm[k] != null && !isNaN(Number(cm[k])) && Number(cm[k]) > 0) {
+          return eurToUsd(Number(cm[k]));
+        }
+      }
+      return null;
+    }
+    /**
+     * Retail exclusives often lack tcgplayer ids on TCGdex stamp rows.
+     * Map cardId + primary stamp → TCGPlayer product id for correct stamped art.
+     * (Miscellaneous Cards & Products listings on TCGPlayer)
+     */
+    const STAMP_TCGPLAYER_PRODUCT = {
+      // Scarlet & Violet — 151 retail stamp promos (TCGPlayer "Miscellaneous Cards & Products")
+      'sv03.5-004|gamestop': 517557,        // Charmander GameStop Exclusive
+      'sv03.5-004|eb-games': 517557,
+      'sv03.5-001|set-logo': 517558,        // Bulbasaur Best Buy Exclusive
+      'sv03.5-001|best-buy': 517558,
+      'sv03.5-007|pokemon-center': 520796,  // Squirtle Pokémon Center Exclusive
+      // SVP Black Star / PC ETB promos
+      'svp-013|pokemon-center': 490730,     // Miraidon
+      'svp-014|pokemon-center': 490730,     // may share listing family — verify
+      'svp-027|pokemon-center': 500264,     // Pikachu
+      'svp-044|pokemon-center': 512036,     // Charmander PC
+      'svp-051|pokemon-center': 517270      // Snorlax PC
+    };
+    function tcgplayerProductImage(productId) {
+      if (!productId) return '';
+      // High-res so corner stamps stay legible
+      return `https://product-images.tcgplayer.com/fit-in/1000x1000/${productId}.jpg`;
+    }
+    function resolveStampTcgplayerId(cardId, stamps, detailTcgId) {
+      if (detailTcgId) return detailTcgId;
+      if (!stamps || !stamps.length) return null;
+      const id = String(cardId || '').toLowerCase();
+      for (const s of stamps) {
+        const key = `${id}|${String(s).toLowerCase()}`;
+        if (STAMP_TCGPLAYER_PRODUCT[key]) return STAMP_TCGPLAYER_PRODUCT[key];
+      }
+      return null;
     }
     function expandPokemonCard(card) {
-      // Returns array of selectable printings — one per real-world variant
+      // One selectable printing per finish + stamp (Pokémon Center, GameStop, Staff, …)
       const baseId = card.id;
       const name = card.name;
       const setId = card.set?.id || '';
       const setName = card.set?.name || '';
       const number = card.localId || card.number || '';
-      const image = card.image ? `${card.image}/high.webp` : '';
+      const baseImage = card.image ? `${card.image}/high.webp` : '';
       const rarity = card.rarity || '';
       const detailed = Array.isArray(card.variants_detailed) ? card.variants_detailed : [];
       const flags = card.variants || {};
       const out = [];
       const seen = new Set();
 
-      function push(type, foil, detail) {
-        const key = variantKey(type, foil || null);
+      function push(type, foil, stamps, detail) {
+        const key = variantKey(type, foil || null, stamps);
         if (seen.has(key)) return;
         seen.add(key);
         const price = detail ? priceForPokemonVariant(detail, key) : null;
+        const detailTcg = detail && detail.thirdParty && detail.thirdParty.tcgplayer;
+        const isStamp = Array.isArray(stamps) && stamps.length > 0;
+        const tcgId = resolveStampTcgplayerId(baseId, stamps, detailTcg);
+        // Stamped exclusives: always prefer TCGPlayer product photo (shows logo/stamp)
+        let image = baseImage;
+        if (isStamp && tcgId) image = tcgplayerProductImage(tcgId);
         out.push({
           game: 'pokemon',
-          scryfallId: `${baseId}::${key}`, // reuse field as universal card key
+          scryfallId: `${baseId}::${key}`,
           pkmId: baseId,
           variantKey: key,
           name,
@@ -2760,22 +2980,53 @@ service cloud.firestore {
           rarity,
           price: price,
           priceFoil: null,
-          finish: key, // store variant as finish for display/matching
-          variantLabel: variantLabel(key)
+          finish: key,
+          variantLabel: variantLabel(key),
+          stamps: isStamp ? stamps.slice() : null,
+          tcgplayerId: tcgId || null
         });
       }
 
+      const promoSet = isPromoSetId(setId, setName, rarity);
+
       if (detailed.length) {
+        let pushedBase = false;
         for (const d of detailed) {
-          push(d.type || 'normal', d.foil || null, d);
+          const type = d.type || 'normal';
+          const foil = d.foil || null; // e.g. 'cosmos'
+          const stamps = Array.isArray(d.stamp) ? d.stamp : [];
+
+          // Promo sets: one base "Promo" + stamp "Exclusive Promo" + cosmos as Cosmos Holo
+          // Avoid fake Normal + Reverse Holo pairs from noisy API flags
+          if (promoSet && !stamps.length) {
+            if (foil && String(foil).toLowerCase().includes('cosmos')) {
+              push('holo', 'cosmos', [], d);
+              continue;
+            }
+            if (foil && foil !== true && String(foil).toLowerCase() !== 'standard') {
+              // other special foils on promos → Exclusive Promo bucket
+              push('exclusive', foil, [], d);
+              continue;
+            }
+            if (pushedBase) continue;
+            // Base Black Star / promo printing
+            push('promo', null, [], d);
+            pushedBase = true;
+            continue;
+          }
+
+          // Main sets: keep real finish types (skip pure-duplicate unstamped reverse of same id later via seen)
+          push(type, foil, stamps, d);
         }
+      } else if (promoSet) {
+        // Single base promo until detail enrichment
+        push('promo', null, [], null);
       } else {
-        // Fallback from boolean flags
-        if (flags.normal) push('normal', null, null);
-        if (flags.holo) push('holo', null, null);
-        if (flags.reverse) push('reverse', null, null);
-        if (flags.firstEdition) push('firstEdition', null, null);
-        if (!out.length) push('normal', null, null);
+        if (flags.normal) push('normal', null, [], null);
+        if (flags.holo) push('holo', null, [], null);
+        if (flags.reverse) push('reverse', null, [], null);
+        if (flags.firstEdition) push('firstEdition', null, [], null);
+        if (!out.length) push('normal', null, [], null);
       }
       return out;
     }
@@ -2888,25 +3139,54 @@ service cloud.firestore {
             if (l.includes('1st')) return 'firstEdition';
             return 'normal';
           };
-          for (const k of variants) {
-            const vk = mapKey(k);
-            const market = prices[k] && (prices[k].market != null ? prices[k].market : prices[k].mid);
+          const promo = isPromoSetId(setId, set.name, b.rarity);
+          if (promo) {
+            // One base row; use first available market price
+            let market = null;
+            for (const k of variants) {
+              const p = prices[k];
+              if (p && (p.market != null || p.mid != null)) {
+                market = Number(p.market != null ? p.market : p.mid);
+                break;
+              }
+            }
             quick.push({
               game: 'pokemon',
-              scryfallId: `${b.id}::${vk}`,
+              scryfallId: `${b.id}::promo`,
               pkmId: b.id,
-              variantKey: vk,
+              variantKey: 'promo',
               name: b.name,
               set: setId,
               setName: set.name || setId,
               collectorNumber: String(b.localId || ''),
               image: b.image || '',
-              rarity: b.rarity || '',
-              price: market != null ? Number(market) : null,
+              rarity: b.rarity || 'Promo',
+              price: market,
               priceFoil: null,
-              finish: vk,
-              variantLabel: variantLabel(vk)
+              finish: 'promo',
+              variantLabel: 'Promo'
             });
+          } else {
+            for (const k of variants) {
+              const vk = mapKey(k);
+              const market = prices[k] && (prices[k].market != null ? prices[k].market : prices[k].mid);
+              quick.push({
+                game: 'pokemon',
+                scryfallId: `${b.id}::${vk}`,
+                pkmId: b.id,
+                variantKey: vk,
+                name: b.name,
+                set: setId,
+                setName: set.name || setId,
+                collectorNumber: String(b.localId || ''),
+                image: b.image || '',
+                rarity: b.rarity || '',
+                price: market != null ? Number(market) : null,
+                priceFoil: null,
+                finish: vk,
+                variantLabel: variantLabel(vk)
+              });
+            }
           }
         } else {
           const card = {
@@ -2914,9 +3194,10 @@ service cloud.firestore {
             name: b.name,
             localId: b.localId,
             image: b.image,
-            set: { id: set.id, name: set.name },
-            variants: { normal: true, reverse: !!(set.cardCount && set.cardCount.reverse), holo: false },
-            rarity: b.rarity || ''
+            set: { id: set.id || setId, name: set.name || setId },
+            // Never invent reverse/holo from set-wide cardCount (promo sets have reverse:1 noise)
+            variants: { normal: true },
+            rarity: b.rarity || 'Promo'
           };
           quick.push(...expandPokemonCard(card));
         }
@@ -2968,19 +3249,21 @@ service cloud.firestore {
       let data = await res.json();
       if (!Array.isArray(data)) data = data.data || [];
       const expanded = [];
-      for (const c of data.slice(0, 40)) {
-        // list endpoint may be brief — fetch full when needed
-        if (c.variants_detailed || c.variants) {
-          expanded.push(...expandPokemonCard(c));
-        } else {
+      // Always hydrate full card — list payload often omits stamp rows / product ids
+      const briefs = data.slice(0, 40);
+      const concurrency = 5;
+      for (let i = 0; i < briefs.length; i += concurrency) {
+        const chunk = briefs.slice(i, i + concurrency);
+        const parts = await Promise.all(chunk.map(async (c) => {
           try {
-            const r = await fetch(`${PKMN_API}/cards/${encodeURIComponent(c.id)}`);
-            if (r.ok) expanded.push(...expandPokemonCard(await r.json()));
-            else expanded.push(...expandPokemonCard(c));
-          } catch (e) {
-            expanded.push(...expandPokemonCard(c));
-          }
-        }
+            const r = await fetch(`${PKMN_API}/cards/${encodeURIComponent(c.id)}`, {
+              mode: 'cors', cache: 'no-store', credentials: 'omit'
+            });
+            if (r.ok) return expandPokemonCard(await r.json());
+          } catch (e) {}
+          return expandPokemonCard(c);
+        }));
+        parts.forEach(list => expanded.push(...list));
       }
       return expanded;
     }
@@ -3501,12 +3784,13 @@ service cloud.firestore {
     function pokemonFinishPip(finish) {
       const k = String(finish || '').toLowerCase();
       if (!k || k === 'normal' || k === 'nonfoil') return '';
+      if (isExclusivePromoFinish(k)) return `<span class="foil-pip exp">ExP</span>`;
+      if (isCosmosFinish(k)) return `<span class="foil-pip ch">CH</span>`;
+      if (isPromoFinish(k) || k === 'promo') return `<span class="foil-pip pro">Pro</span>`;
       if (k.includes('masterball')) return `<span class="foil-pip mb">MB</span>`;
       if (k.includes('pokeball')) return `<span class="foil-pip pb">PB</span>`;
-      if (k === 'reverse' || k.includes('reverse')) return `<span class="foil-pip rh">RH</span>`;
-      if (k === 'holo' || k.startsWith('holo') || k.includes('holofoil')) return `<span class="foil-pip h">H</span>`;
-      if (k.includes('cosmos')) return `<span class="foil-pip h">H</span>`;
-      if (k.includes('first')) return `<span class="foil-pip sf">1st</span>`;
+      if (k.includes('reverse')) return `<span class="foil-pip rh">RH</span>`;
+      if (k.includes('holo') || k.includes('holofoil')) return `<span class="foil-pip h">H</span>`;
       return '';
     }
 
@@ -3835,21 +4119,43 @@ service cloud.firestore {
       const num = c.collectorNumber ? `#${c.collectorNumber}` : '';
       const title = num ? `${num} — ${c.name}` : c.name;
       let variantHtml = '';
+      let stampRibbon = '';
       if (c.game === 'pokemon' && c.variantLabel) {
         const cls = variantBadgeClass(c.variantKey || c.finish || '');
         variantHtml = `<span class="variant-badge ${cls}">${escapeHtml(c.variantLabel)}</span> `;
+        if ((c.stamps && c.stamps.length) || String(c.variantKey || '').includes('stamp:')) {
+          stampRibbon = `<div class="stamp-ribbon"><span>${escapeHtml(c.variantLabel)}</span></div>`;
+        }
       }
       const safeId = String(c.scryfallId).replace(/\\/g, '\\\\').replace(/'/g, "\\'");
-      return `<div class="card ${selected}" onclick="toggleSelect('${safeId}')" data-id="${escapeHtml(c.scryfallId)}">
-        <div class="check">✓</div>
-        <div class="card-img-wrap">
-          <img src="${c.image || ''}" loading="lazy" alt="" decoding="async" onerror="this.style.opacity=0.3" />
+      return `<div class="card browse-card ${selected}" data-id="${escapeHtml(c.scryfallId)}">
+        <div class="check" title="Select for bulk add" onclick="event.stopPropagation(); toggleSelect('${safeId}')">✓</div>
+        <div class="card-img-wrap" onclick="openBrowseCard('${safeId}')">
+          ${stampRibbon}
+          <img src="${escapeHtml(c.image || '')}" loading="lazy" alt="" decoding="async" onerror="this.onerror=null;this.style.opacity=0.35" />
         </div>
-        <div class="card-body">
+        <div class="card-body" onclick="openBrowseCard('${safeId}')">
           <div class="card-name">${variantHtml}${escapeHtml(title)}</div>
           <div class="card-meta">${escapeHtml((c.set || '').toUpperCase())} · ${price || '—'}</div>
         </div>
       </div>`;
+    }
+    function findBrowseCard(id) {
+      const lists = [state.currentSetCards, state.searchResults];
+      for (const list of lists) {
+        if (!list || !list.length) continue;
+        const hit = list.find(c => c.scryfallId === id);
+        if (hit) return { card: hit, list };
+      }
+      return null;
+    }
+    function openBrowseCard(id) {
+      const found = findBrowseCard(id);
+      if (!found) return;
+      const { card, list } = found;
+      state.browseIds = list.map(c => c.scryfallId);
+      state.browseIndex = state.browseIds.indexOf(id);
+      openAddCard(card, { keepBrowse: true });
     }
     function toggleSelect(id) {
       if (state.selected.has(id)) state.selected.delete(id);
@@ -3955,11 +4261,13 @@ service cloud.firestore {
     }
 
     // ---------- single card add/edit ----------
-    function openAddCard(card) {
+    function openAddCard(card, opts) {
       state.pendingCard = card;
       state.editingItemId = null;
-      state.browseIds = [];
-      state.browseIndex = -1;
+      if (!(opts && opts.keepBrowse)) {
+        state.browseIds = [];
+        state.browseIndex = -1;
+      }
       document.getElementById('modalSaveBtn').textContent = 'Add';
       document.getElementById('modalDeleteBtn').style.display = 'none';
       fillCardModal(card);
@@ -3995,7 +4303,8 @@ service cloud.firestore {
           <option value="reverse::pokeball">Poké Ball</option>
           <option value="reverse::masterball">Master Ball</option>
           <option value="holo::cosmos">Cosmos Holo</option>
-          <option value="firstEdition">1st Edition</option>`;
+          <option value="promo">Promo</option>
+          <option value="exclusive">Exclusive Promo</option>`;
       } else {
         sel.innerHTML = `
           <option value="nonfoil">Non-foil</option>
@@ -4008,11 +4317,23 @@ service cloud.firestore {
         const k = String(v).toLowerCase();
         if (k === 'nonfoil') v = 'normal';
         else if (k === 'foil' && !k.includes('::')) v = 'holo';
-        // keep reverse::pokeball etc. as-is
+        else if (isCosmosFinish(k)) {
+          delete sel.dataset.realFinish;
+          v = 'holo::cosmos';
+        } else if (isPromoFinish(k)) {
+          delete sel.dataset.realFinish;
+          v = 'promo';
+        } else if (isExclusivePromoFinish(k)) {
+          // Keep real stamp key so Save doesn't wipe PC/GameStop id
+          sel.dataset.realFinish = currentFinish || v;
+          v = 'exclusive';
+        } else {
+          delete sel.dataset.realFinish;
+        }
       } else {
         if (v === 'normal') v = 'nonfoil';
+        delete sel.dataset.realFinish;
       }
-      // If value not in list, add temporary option so selection isn't blank
       if (![...sel.options].some(o => o.value === v)) {
         const opt = document.createElement('option');
         opt.value = v;
@@ -4040,26 +4361,42 @@ service cloud.firestore {
       nextBtn.classList.toggle('visible', hasNext);
 
       if (hasPrev) {
-        const p = state.items.find(i => i.id === ids[idx - 1]);
+        const p = resolveBrowseRef(ids[idx - 1]);
         prevImg.src = p?.image || '';
         prevImg.style.opacity = p?.image ? '1' : '0.3';
       } else {
         prevImg.removeAttribute('src');
       }
       if (hasNext) {
-        const n = state.items.find(i => i.id === ids[idx + 1]);
+        const n = resolveBrowseRef(ids[idx + 1]);
         nextImg.src = n?.image || '';
         nextImg.style.opacity = n?.image ? '1' : '0.3';
       } else {
         nextImg.removeAttribute('src');
       }
     }
+    function resolveBrowseRef(id) {
+      if (!id) return null;
+      const item = state.items.find(i => i.id === id);
+      if (item) return item;
+      const found = findBrowseCard(id);
+      return found ? found.card : null;
+    }
     function navCard(delta) {
       const ids = state.browseIds || [];
       const nextIdx = (state.browseIndex ?? -1) + delta;
       if (nextIdx < 0 || nextIdx >= ids.length) return;
-      // Switch to neighbor (does not auto-save current edits)
-      openEditItem(ids[nextIdx], delta > 0 ? 'left' : 'right');
+      const id = ids[nextIdx];
+      // Collection item ids vs browse/search scryfallIds
+      if (state.items.some(i => i.id === id)) {
+        openEditItem(id, delta > 0 ? 'left' : 'right');
+        return;
+      }
+      const found = findBrowseCard(id);
+      if (found) {
+        state.browseIndex = nextIdx;
+        openAddCard(found.card, { keepBrowse: true });
+      }
     }
     function fillCardModal(c, isItem, direction) {
       const img = document.getElementById('modalCardImg');
@@ -4117,7 +4454,14 @@ service cloud.firestore {
       const quantity = parseInt(document.getElementById('modalQty').value) || 1;
       const folderIdForPaid = document.getElementById('modalFolder').value;
       const paidRaw = document.getElementById('modalPaid').value;
-      let finish = document.getElementById('modalFoil').value || 'nonfoil';
+      const foilSel = document.getElementById('modalFoil');
+      let finish = foilSel.value || 'nonfoil';
+      // Preserve stamp-specific key when user leaves Exclusive selected
+      if (finish === 'exclusive' && foilSel.dataset.realFinish) {
+        finish = foilSel.dataset.realFinish;
+      } else if (finish === 'exclusive') {
+        finish = 'exclusive';
+      }
       const condition = document.getElementById('modalCondition').value;
       // Resolve game from edited item or pending card
       const ref = state.editingItemId
